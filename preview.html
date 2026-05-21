@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transcript Studio</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Georgia, "Times New Roman", serif;
+        color: #15171a;
+        --bg-a: #f8fbff;
+        --bg-b: #eef8f4;
+        --bg-c: #fff8ef;
+        --line: #dfe8ef;
+        --card: rgba(255, 255, 255, 0.88);
+        --ink-soft: #556273;
+        --accent: #df2a2a;
+        --accent-dark: #1a1d21;
+        --green: #1e6e59;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at top right, rgba(223, 42, 42, 0.09), transparent 24%),
+          radial-gradient(circle at left 30%, rgba(30, 110, 89, 0.08), transparent 28%),
+          linear-gradient(135deg, var(--bg-a) 0%, var(--bg-b) 52%, var(--bg-c) 100%);
+      }
+
+      button, input, textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+        border: 0;
+      }
+
+      .offer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 8px 16px;
+        background: #111;
+        color: #f8fbff;
+        text-align: center;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .nav, .shell {
+        width: min(1200px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 22px 0;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--accent);
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .brandMark {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: var(--accent);
+        color: white;
+        font-size: 13px;
+      }
+
+      .navActions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        padding: 0 18px;
+        border-radius: 7px;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 15px;
+        font-weight: 900;
+        transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      }
+
+      .btn:hover { transform: translateY(-1px); }
+
+      .ghost {
+        background: rgba(255, 255, 255, 0.76);
+        border: 1px solid var(--line);
+        color: var(--accent-dark);
+      }
+
+      .dark {
+        background: var(--accent-dark);
+        color: white;
+      }
+
+      .primary {
+        background: var(--accent);
+        color: white;
+        box-shadow: 0 12px 28px rgba(223, 42, 42, 0.2);
+      }
+
+      .shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 28px;
+        padding: 10px 0 48px;
+      }
+
+      .intro {
+        padding: 34px 0 24px;
+        animation: rise 500ms ease;
+      }
+
+      .eyebrow {
+        color: var(--green);
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 13px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      h1, h2, h3, p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 790px;
+        margin: 12px 0 14px;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: clamp(44px, 7vw, 86px);
+        line-height: 0.96;
+      }
+
+      .intro p {
+        max-width: 660px;
+        color: var(--ink-soft);
+        font-size: 18px;
+        line-height: 1.65;
+      }
+
+      .generator {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 150px;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        background: var(--card);
+        border: 1px solid rgba(21, 23, 26, 0.08);
+        box-shadow: 0 24px 70px rgba(36, 35, 30, 0.11);
+      }
+
+      .inputWrap {
+        display: flex;
+        align-items: center;
+        min-height: 58px;
+        padding: 0 16px;
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+      }
+
+      input {
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        font-size: 16px;
+      }
+
+      .message {
+        margin-top: 14px;
+        padding: 14px;
+        border-radius: 7px;
+        display: none;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .message.show { display: block; }
+      .message.error { background: #fff1f1; border: 1px solid #f3c8c8; color: #8e2424; }
+      .message.warn { background: #fff9e8; border: 1px solid #f2df9f; color: #6d5411; }
+      .message.ok { background: #edf9f2; border: 1px solid #cbead5; color: #1f6a44; }
+
+      .previewBand {
+        display: grid;
+        grid-template-columns: minmax(220px, 360px) minmax(0, 1fr);
+        gap: 18px;
+        margin-top: 24px;
+      }
+
+      .videoPreview {
+        overflow: hidden;
+        aspect-ratio: 16 / 9;
+        border-radius: 8px;
+        background: #202020;
+        box-shadow: 0 20px 55px rgba(20, 20, 20, 0.14);
+      }
+
+      .videoPreview img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+
+      .placeholder {
+        display: grid;
+        place-items: center;
+        height: 100%;
+        color: white;
+        font-size: 42px;
+      }
+
+      .stats {
+        display: grid;
+        gap: 10px;
+      }
+
+      .stats div, .card, .result {
+        background: var(--card);
+        border: 1px solid rgba(23, 23, 23, 0.08);
+        border-radius: 8px;
+      }
+
+      .stats div {
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 15px;
+        font-weight: 900;
+        color: #313941;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 18px;
+        align-self: start;
+        display: grid;
+        gap: 14px;
+      }
+
+      .card {
+        padding: 16px;
+        box-shadow: 0 18px 50px rgba(24, 21, 18, 0.09);
+      }
+
+      .profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .avatar {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        background: #dff1e9;
+        color: #0d5f49;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 16px;
+        font-weight: 900;
+      }
+
+      h3 {
+        margin: 0 0 12px;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 15px;
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 0;
+        border-top: 1px solid #e5edf4;
+      }
+
+      .row span, .muted {
+        color: #657282;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 12px;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+
+      .historyItem {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 58px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        border-radius: 7px;
+        background: #f9fbfd;
+        border: 1px solid #e3ebf3;
+        text-align: left;
+      }
+
+      .historyItem strong {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      .historyItem small {
+        display: block;
+        color: #657282;
+        margin-top: 4px;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+      }
+
+      .emptyState {
+        padding: 12px 0 2px;
+        color: var(--ink-soft);
+        line-height: 1.5;
+      }
+
+      .result {
+        display: none;
+        margin-top: 24px;
+        overflow: hidden;
+        box-shadow: 0 18px 50px rgba(24, 21, 18, 0.09);
+      }
+
+      .result.show { display: block; animation: rise 320ms ease; }
+
+      .resultHead {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 18px;
+        border-bottom: 1px solid #e5edf4;
+      }
+
+      .resultHead h2 {
+        margin: 4px 0 0;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 20px;
+      }
+
+      pre {
+        max-height: 520px;
+        margin: 0;
+        padding: 22px;
+        overflow: auto;
+        white-space: pre-wrap;
+        color: #252a31;
+        line-height: 1.7;
+        font-size: 14px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        place-items: center;
+        padding: 20px;
+        background: rgba(24, 22, 18, 0.54);
+        backdrop-filter: blur(10px);
+      }
+
+      .modal.show { display: grid; }
+
+      .modalBox {
+        width: min(460px, 100%);
+        padding: 28px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3);
+      }
+
+      .modalBox h2 {
+        margin: 12px 0 8px;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 31px;
+        line-height: 1.04;
+      }
+
+      .modalBox p {
+        color: #5f6b7a;
+        line-height: 1.55;
+      }
+
+      .modalBox label {
+        display: grid;
+        gap: 7px;
+        margin: 12px 0;
+        color: #4b5563;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .modalBox input {
+        min-height: 48px;
+        padding: 0 13px;
+        border: 1px solid #dce5ee;
+        border-radius: 7px;
+        background: white;
+      }
+
+      .buttonRow {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+
+      .statusText {
+        margin-top: 12px;
+        color: #5f6b7a;
+        line-height: 1.5;
+      }
+
+      .logoutBtn {
+        margin-left: auto;
+      }
+
+      @keyframes rise {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @media (max-width: 920px) {
+        .shell { grid-template-columns: 1fr; }
+        .sidebar { position: static; }
+      }
+
+      @media (max-width: 640px) {
+        .generator, .previewBand { grid-template-columns: 1fr; }
+        h1 { font-size: 44px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import React, { useEffect, useMemo, useState } from "https://esm.sh/react@19";
+      import { createRoot } from "https://esm.sh/react-dom@19/client";
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+      const SUPABASE_URL = "https://xtkdvqyhkzhpgubqmbcu.supabase.co";
+      const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T2QkuYKvDBOeCplacB4yMg_JXFwz3Pn";
+      const TRANSCRIPT_API = "/api/transcript";
+      const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+      function formatTranscriptError(message) {
+        if (!message) {
+          return "Transcript generation failed. Log in, restart the preview server, and confirm APIFY_TOKEN is in .env.";
+        }
+        return message;
+      }
+
+      function getVideoId(value) {
+        const input = String(value || "").trim();
+        if (/^[a-zA-Z0-9_-]{11}$/.test(input)) return input;
+        try {
+          const url = new URL(input);
+          const host = url.hostname.replace(/^www\./, "");
+          if (host === "youtu.be") return url.pathname.split("/").filter(Boolean)[0] || "";
+          if (host.endsWith("youtube.com")) {
+            if (url.pathname === "/watch") return url.searchParams.get("v") || "";
+            if (url.pathname.startsWith("/shorts/") || url.pathname.startsWith("/embed/")) {
+              return url.pathname.split("/").filter(Boolean)[1] || "";
+            }
+          }
+        } catch {}
+        return "";
+      }
+
+      function formatDate(value) {
+        return new Intl.DateTimeFormat("en", {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        }).format(new Date(value));
+      }
+
+      function getEmailRedirectTo() {
+        const protocol = window.location.protocol;
+        if (protocol === "http:" || protocol === "https:") {
+          return window.location.href.split("#")[0];
+        }
+        return undefined;
+      }
+
+      function App() {
+        const [session, setSession] = useState(null);
+        const [videoUrl, setVideoUrl] = useState("");
+        const [result, setResult] = useState(null);
+        const [history, setHistory] = useState([]);
+        const [profile, setProfile] = useState(null);
+        const [authOpen, setAuthOpen] = useState(false);
+        const [authMode, setAuthMode] = useState("signup");
+        const [email, setEmail] = useState("");
+        const [password, setPassword] = useState("");
+        const [status, setStatus] = useState("");
+        const [statusTone, setStatusTone] = useState("warn");
+        const [authStatus, setAuthStatus] = useState("");
+        const [loading, setLoading] = useState(false);
+        const [authBusy, setAuthBusy] = useState(false);
+        const [copied, setCopied] = useState(false);
+        const isFilePreview = window.location.protocol === "file:";
+
+        const videoId = useMemo(() => getVideoId(videoUrl), [videoUrl]);
+        const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : "";
+        const daysLeft = profile?.trialEndsAt ? Math.max(0, Math.ceil((new Date(profile.trialEndsAt).getTime() - Date.now()) / 86400000)) : 7;
+
+        useEffect(() => {
+          supabase.auth.getSession().then(({ data }) => setSession(data.session));
+          const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+            setSession(nextSession);
+          });
+          return () => listener.subscription.unsubscribe();
+        }, []);
+
+        useEffect(() => {
+          if (!session?.user) {
+            setHistory([]);
+            setProfile(null);
+            return;
+          }
+          refreshHistory();
+          refreshProfile();
+        }, [session?.user?.id]);
+
+        async function refreshHistory() {
+          const { data, error } = await supabase
+            .from("transcript_history")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(20);
+
+          if (!error) setHistory(data || []);
+        }
+
+        async function refreshProfile() {
+          const { data } = await supabase
+            .from("profiles")
+            .select("trial_started_at")
+            .eq("id", session.user.id)
+            .maybeSingle();
+
+          const trialStart = data?.trial_started_at ? new Date(data.trial_started_at) : new Date();
+          setProfile({ trialEndsAt: new Date(trialStart.getTime() + 7 * 86400000).toISOString() });
+        }
+
+        async function submitAuth(event) {
+          event.preventDefault();
+          setAuthBusy(true);
+          setAuthStatus("");
+
+          const authOptions = getEmailRedirectTo()
+            ? { emailRedirectTo: getEmailRedirectTo() }
+            : undefined;
+
+          const action = authMode === "signup"
+            ? supabase.auth.signUp({ email, password, options: authOptions })
+            : supabase.auth.signInWithPassword({ email, password });
+
+          const { data, error } = await action;
+          setAuthBusy(false);
+
+          if (error) {
+            setAuthStatus(error.message);
+            return;
+          }
+
+          if (authMode === "signup" && !data.session) {
+            setAuthStatus(
+              isFilePreview
+                ? "Account created. Check your email and open the confirmation link. If it opens a localhost error page, that usually means verification already completed. Come back here and log in."
+                : "Account created. Check your email for the confirmation link, then log in."
+            );
+            setAuthMode("login");
+            return;
+          }
+
+          setAuthOpen(false);
+          setPassword("");
+          setStatus("");
+        }
+
+        async function generateTranscript(event) {
+          event.preventDefault();
+          setStatus("");
+
+          if (!videoId) {
+            setStatusTone("warn");
+            setStatus("Paste a valid YouTube link, Shorts link, share link, embed link, or 11-character video ID.");
+            return;
+          }
+
+          if (!session) {
+            setAuthMode("signup");
+            setAuthOpen(true);
+            return;
+          }
+
+          setLoading(true);
+          const response = await fetch(TRANSCRIPT_API, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ videoUrl: videoUrl.trim() })
+          });
+          const data = await response.json().catch(() => ({}));
+          setLoading(false);
+
+          if (!response.ok || data?.error) {
+            setStatusTone("error");
+            setStatus(formatTranscriptError(data?.error) || `Transcript generation failed with status ${response.status}.`);
+            return;
+          }
+
+          setResult(data.transcript);
+          setProfile({ trialEndsAt: data.trialEndsAt });
+          setStatusTone("ok");
+          setStatus("Transcript generated and saved to your history.");
+          refreshHistory();
+        }
+
+        async function copyTranscript() {
+          if (!result?.transcript) return;
+          await navigator.clipboard.writeText(result.transcript);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1200);
+        }
+
+        async function logout() {
+          await supabase.auth.signOut();
+          setResult(null);
+          setStatus("");
+        }
+
+        function loadHistoryItem(item) {
+          setResult(item);
+          setStatus("");
+        }
+
+        return React.createElement(React.Fragment, null,
+          React.createElement("div", { className: "offer" }, "Limited time offer: generate unlimited transcripts for 7 days after signup"),
+          React.createElement("header", { className: "nav" },
+            React.createElement("div", { className: "brand" },
+              React.createElement("span", { className: "brandMark" }, "▶"),
+              "Transcript Studio"
+            ),
+            React.createElement("div", { className: "navActions" },
+              session
+                ? React.createElement("button", { className: "btn ghost", onClick: logout }, "Log out")
+                : React.createElement(React.Fragment, null,
+                    React.createElement("button", { className: "btn ghost", onClick: () => { setAuthMode("login"); setAuthOpen(true); } }, "Log in"),
+                    React.createElement("button", { className: "btn dark", onClick: () => { setAuthMode("signup"); setAuthOpen(true); } }, "Sign up")
+                  )
+            )
+          ),
+          React.createElement("main", { className: "shell" },
+            React.createElement("section", null,
+              React.createElement("div", { className: "intro" },
+                React.createElement("span", { className: "eyebrow" }, "YouTube transcript generator"),
+                React.createElement("h1", null, "Paste a video. Get a clean transcript."),
+                React.createElement("p", null, "Drop any standard YouTube URL, Shorts link, share link, embed URL, or video ID. Your account keeps every transcript organized in history.")
+              ),
+              React.createElement("form", { className: "generator", onSubmit: generateTranscript },
+                React.createElement("div", { className: "inputWrap" },
+                  React.createElement("input", {
+                    value: videoUrl,
+                    onChange: (event) => setVideoUrl(event.target.value),
+                    placeholder: "Paste YouTube URL or video ID"
+                  })
+                ),
+                React.createElement("button", { className: "btn primary", disabled: loading }, loading ? "Generating..." : "Generate")
+              ),
+              React.createElement("div", { className: `message ${status ? "show" : ""} ${statusTone}` }, status),
+              React.createElement("div", { className: "previewBand" },
+                React.createElement("div", { className: "videoPreview" },
+                  thumbnail
+                    ? React.createElement("img", { src: thumbnail, alt: "YouTube thumbnail" })
+                    : React.createElement("div", { className: "placeholder" }, "▶")
+                ),
+                React.createElement("div", { className: "stats" },
+                  React.createElement("div", null, "Captions-first extraction"),
+                  React.createElement("div", null, daysLeft > 0 ? "Unlimited trial active" : "1 daily credit after trial"),
+                  React.createElement("div", null, "Saved to Supabase history")
+                )
+              ),
+              React.createElement("section", { className: `result ${result ? "show" : ""}` },
+                React.createElement("div", { className: "resultHead" },
+                  React.createElement("div", null,
+                    React.createElement("span", { className: "muted" }, "Latest transcript"),
+                    React.createElement("h2", null, result?.title || "Transcript")
+                  ),
+                  React.createElement("button", { className: "btn ghost", onClick: copyTranscript }, copied ? "Copied" : "Copy")
+                ),
+                React.createElement("pre", null, result?.transcript || "")
+              )
+            ),
+            React.createElement("aside", { className: "sidebar" },
+              React.createElement("div", { className: "card profile" },
+                React.createElement("div", { className: "avatar" }, session?.user?.email?.[0]?.toUpperCase() || "G"),
+                React.createElement("div", null,
+                  React.createElement("span", { className: "muted" }, session ? "Signed in" : "Guest"),
+                  React.createElement("strong", null, session?.user?.email || "Create an account to start")
+                )
+              ),
+              React.createElement("div", { className: "card" },
+                React.createElement("h3", null, "Account settings"),
+                React.createElement("div", { className: "row" }, React.createElement("span", null, "Credits"), React.createElement("strong", null, daysLeft > 0 ? "Unlimited" : "1 daily")),
+                React.createElement("div", { className: "row" }, React.createElement("span", null, "Billing"), React.createElement("strong", null, "Free plan")),
+                React.createElement("div", { className: "row" }, React.createElement("span", null, "Offer"), React.createElement("strong", null, `${Math.max(daysLeft, 0)} days left`))
+              ),
+              React.createElement("div", { className: "card" },
+                React.createElement("h3", null, "History"),
+                history.length
+                  ? history.map((item) =>
+                      React.createElement("button", { key: item.id, className: "historyItem", onClick: () => loadHistoryItem(item) },
+                        React.createElement("div", null,
+                          React.createElement("strong", null, item.title || "Untitled transcript"),
+                          React.createElement("small", null, formatDate(item.created_at))
+                        )
+                      )
+                    )
+                  : React.createElement("div", { className: "emptyState" }, "Generated transcripts will appear here after your first successful run.")
+              )
+            )
+          ),
+          React.createElement("div", { className: `modal ${authOpen ? "show" : ""}` },
+            React.createElement("div", { className: "modalBox" },
+              React.createElement("span", { className: "eyebrow" }, "First generation is free"),
+              React.createElement("h2", null, authMode === "signup" ? "Create your account first" : "Log in to continue"),
+              React.createElement("p", null, "Your first transcript needs a verified account so we can save history and manage credits."),
+              isFilePreview && authMode === "signup"
+                ? React.createElement("div", { className: "message show warn", style: { marginTop: 0, marginBottom: 12 } }, "This page is being opened as a local file preview. Email confirmation may bounce to localhost after verification. If that happens, return here and log in with the same email and password.")
+                : null,
+              React.createElement("form", { onSubmit: submitAuth },
+                React.createElement("label", null, "Email", React.createElement("input", {
+                  type: "email",
+                  value: email,
+                  onChange: (event) => setEmail(event.target.value),
+                  placeholder: "you@example.com",
+                  required: true
+                })),
+                React.createElement("label", null, "Password", React.createElement("input", {
+                  type: "password",
+                  value: password,
+                  onChange: (event) => setPassword(event.target.value),
+                  placeholder: "Minimum 6 characters",
+                  minLength: 6,
+                  required: true
+                })),
+                authStatus ? React.createElement("div", { className: "statusText" }, authStatus) : null,
+                React.createElement("div", { className: "buttonRow" },
+                  React.createElement("button", { className: "btn primary", type: "submit", disabled: authBusy }, authBusy ? "Please wait..." : authMode === "signup" ? "Create account" : "Log in"),
+                  React.createElement("button", { className: "btn ghost", type: "button", onClick: () => setAuthOpen(false) }, "Close")
+                )
+              ),
+              React.createElement("div", { className: "buttonRow" },
+                React.createElement("button", {
+                  className: "btn ghost",
+                  onClick: () => {
+                    setAuthMode(authMode === "signup" ? "login" : "signup");
+                    setAuthStatus("");
+                  }
+                }, authMode === "signup" ? "Already have an account?" : "Create a new account")
+              ),
+              authMode === "login"
+                ? React.createElement("div", { className: "buttonRow" },
+                    React.createElement("button", {
+                      className: "btn ghost",
+                      onClick: () => {
+                        setAuthStatus("If you clicked the email link and saw a localhost error, return here and try logging in now. The verification step usually completes before that redirect fails.");
+                      }
+                    }, "I already confirmed my email")
+                  )
+                : null
+            )
+          )
+        );
+      }
+
+      createRoot(document.getElementById("root")).render(React.createElement(App));
+    </script>
+  </body>
+</html>
