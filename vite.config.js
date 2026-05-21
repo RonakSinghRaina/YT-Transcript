@@ -48,8 +48,16 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   Object.assign(process.env, env);
 
+  // GitHub Pages serves at https://<user>.github.io/<repo-name>/
+  const base = env.VITE_BASE_PATH || '/';
+
   return {
-    plugins: [react(), tailwindcss(), transcriptApiPlugin()],
+    base,
+    plugins: [
+      react(),
+      tailwindcss(),
+      ...(mode === 'development' ? [transcriptApiPlugin()] : []),
+    ],
     ssr: {
       external: ['ws'],
     },

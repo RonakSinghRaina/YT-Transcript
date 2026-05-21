@@ -15,7 +15,21 @@ import History from './views/History';
 import Settings from './views/Settings';
 import Help from './views/Help';
 
-const TRANSCRIPT_API = import.meta.env.VITE_TRANSCRIPT_API || '/api/transcript';
+function resolveTranscriptApi() {
+  if (import.meta.env.VITE_TRANSCRIPT_API) {
+    return import.meta.env.VITE_TRANSCRIPT_API;
+  }
+  if (import.meta.env.DEV) {
+    return '/api/transcript';
+  }
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  if (supabaseUrl) {
+    return `${supabaseUrl}/functions/v1/generate-transcript-v3`;
+  }
+  return '/api/transcript';
+}
+
+const TRANSCRIPT_API = resolveTranscriptApi();
 
 export default function App() {
   const [page, setPage] = useState('dashboard');
