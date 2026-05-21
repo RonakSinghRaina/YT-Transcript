@@ -13,11 +13,11 @@ const FEATURES = [
   },
   {
     icon: 'schedule',
-    iconClass: 'text-secondary',
+    iconClass: 'text-primary-fixed',
     title: 'Precision Timestamps',
     description: 'Navigate long-form content effortlessly with intelligent timeline markers.',
     wide: false,
-    glow: 'bg-secondary/10',
+    glow: 'bg-primary-container/8',
     float: 'float-card-delay-1',
   },
   {
@@ -65,7 +65,7 @@ export default function FeatureCards() {
               />
             )}
             {feature.icon === 'schedule' && (
-              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-secondary/10 blur-[40px]" />
+              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary-container/10 blur-[40px]" />
             )}
             {feature.icon === 'import_export' && (
               <div className="pointer-events-none absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-tertiary-container/5 blur-[50px]" />

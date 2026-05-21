@@ -56,7 +56,7 @@ export default function Dashboard({
     return (
       <div className="relative z-10 mx-auto max-w-4xl space-y-10 py-4">
         <div className="relative text-center">
-          <div className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary/5 blur-[100px]" />
+          <div className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary-container/8 blur-[100px]" />
           <h1 className="text-3xl font-bold tracking-tight text-on-surface md:text-5xl">
             Paste a video. Get a clean{' '}
             <span className="text-gradient-primary">transcript</span>.
@@ -68,7 +68,7 @@ export default function Dashboard({
         </div>
 
         <form onSubmit={onGenerate} className="w-full max-w-3xl mx-auto">
-          <div className="glass-panel flex flex-col items-stretch gap-2 rounded-full p-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] transition-shadow duration-500 hover:shadow-[0_8px_32px_0_rgba(221,183,255,0.1)] sm:flex-row sm:items-center">
+          <div className="glass-panel flex flex-col items-stretch gap-2 rounded-full p-2 shadow-[0_4px_24px_0_rgba(0,0,0,0.4)] transition-shadow duration-300 hover:shadow-[0_4px_28px_0_rgba(124,58,237,0.15)] sm:flex-row sm:items-center">
             <div className="relative flex flex-1 items-center">
               <Icon
                 name="link"
@@ -86,7 +86,7 @@ export default function Dashboard({
             <button
               type="submit"
               disabled={loading || !videoId}
-              className="btn-pulse flex h-14 shrink-0 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-primary-container to-secondary-container px-8 text-sm font-bold tracking-wide text-on-primary disabled:opacity-50"
+              className="btn-pulse flex h-14 shrink-0 items-center justify-center gap-2 rounded-full bg-gradient-accent px-8 text-sm font-bold tracking-wide text-on-primary-container disabled:opacity-50"
             >
               {loading ? (
                 <Icon name="progress_activity" className="animate-spin" />
@@ -259,7 +259,7 @@ export default function Dashboard({
                   <button
                     type="button"
                     onClick={() => downloadTranscriptPdf(result)}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary-container/80 to-secondary-container/80 py-3 font-bold text-on-primary"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-accent py-3 font-bold text-on-primary-container"
                   >
                     <Icon name="picture_as_pdf" />
                     PDF

@@ -11,8 +11,8 @@ export default function SideNav({ page, onNavigate, onGoHome, onNewTranscript, o
   return (
     <aside className="relative z-20 hidden h-screen w-64 shrink-0 flex-col overflow-hidden border-r border-white/5 md:flex">
       <div className="absolute inset-0 bg-gradient-to-b from-surface-container-low via-surface-container to-surface-container-low" />
-      <div className="absolute -left-24 top-0 h-48 w-48 rounded-full bg-primary/20 blur-[80px]" />
-      <div className="absolute -left-16 bottom-24 h-40 w-40 rounded-full bg-secondary/15 blur-[60px]" />
+      <div className="absolute -left-24 top-0 h-40 w-40 rounded-full bg-primary-container/15 blur-[80px]" />
+      <div className="absolute -left-16 bottom-24 h-32 w-32 rounded-full bg-secondary-container/20 blur-[60px]" />
 
       <div className="relative flex h-full flex-col p-6">
         <div className="mb-10">
@@ -47,7 +47,7 @@ export default function SideNav({ page, onNavigate, onGoHome, onNewTranscript, o
                 onClick={() => onNavigate(item.id)}
                 className={`flex items-center gap-2 rounded-xl p-3 transition-all duration-300 ${
                   active
-                    ? 'scale-[0.98] border border-primary/20 bg-gradient-to-r from-primary-container/30 to-secondary-container/20 text-primary shadow-[0_0_20px_rgba(221,183,255,0.15)]'
+                    ? 'scale-[0.98] border border-primary/25 bg-gradient-accent-soft text-primary shadow-[0_0_12px_rgba(124,58,237,0.12)]'
                     : 'text-on-surface-variant hover:border hover:border-white/5 hover:bg-white/5 hover:text-primary'
                 }`}
               >
@@ -62,7 +62,7 @@ export default function SideNav({ page, onNavigate, onGoHome, onNewTranscript, o
           <button
             type="button"
             onClick={onNewTranscript}
-            className="btn-pulse flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary-container to-secondary-container py-3 text-xs font-semibold uppercase tracking-wide text-on-primary"
+            className="btn-pulse flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-accent py-3 text-xs font-semibold uppercase tracking-wide text-on-primary-container"
           >
             <Icon name="add" className="text-lg" />
             New Transcript

@@ -21,7 +21,7 @@ export default function TopBar({
 
   return (
     <header className="sticky top-0 z-30 px-4 py-3 md:px-8">
-      <div className="glass-panel mx-auto flex max-w-container-max items-center justify-between rounded-full border-white/10 px-4 py-2 shadow-[0_8px_32px_0_rgba(132,43,210,0.1)] md:px-8">
+      <div className="glass-panel mx-auto flex max-w-container-max items-center justify-between rounded-full border-white/10 px-4 py-2 shadow-[0_4px_24px_0_rgba(0,0,0,0.35)] md:px-8">
         <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <button
             type="button"
@@ -84,7 +84,7 @@ export default function TopBar({
 
           {session ? (
             <div
-              className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-primary/30 bg-gradient-to-br from-primary-fixed/40 to-secondary/20 text-sm font-bold text-primary"
+              className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-primary/25 bg-gradient-accent-soft text-sm font-bold text-primary"
               title={displayName}
             >
               {initials}

@@ -126,7 +126,7 @@ const VideoPlayer = forwardRef(function VideoPlayer({ videoId, title, videoUrl }
               className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors hover:bg-black/30"
               aria-label="Play video"
             >
-              <span className="btn-pulse flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-primary-container to-secondary-container text-on-primary shadow-xl">
+              <span className="btn-pulse flex h-20 w-20 items-center justify-center rounded-full bg-gradient-accent text-on-primary-container shadow-lg">
                 <Icon name="play_arrow" fill className="text-5xl text-white" />
               </span>
             </button>
@@ -164,7 +164,7 @@ const VideoPlayer = forwardRef(function VideoPlayer({ videoId, title, videoUrl }
             href={watchUrl}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1 text-sm font-bold text-primary transition-colors hover:text-secondary"
+            className="flex items-center gap-1 text-sm font-bold text-primary transition-colors hover:text-primary-fixed"
           >
             <Icon name="open_in_new" className="text-lg" />
             Open on YouTube

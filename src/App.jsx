@@ -253,9 +253,8 @@ export default function App() {
   return (
     <div className="relative flex h-screen overflow-hidden bg-background">
       <div className="noise-overlay" aria-hidden />
-      <div className="ambient-glow ambient-glow-purple h-[600px] w-[600px] -left-[100px] -top-[100px]" aria-hidden />
-      <div className="ambient-glow ambient-glow-blue h-[800px] w-[800px] -right-[200px] top-[20%]" aria-hidden />
-      <div className="ambient-glow ambient-glow-purple h-[500px] w-[500px] -bottom-[200px] left-[20%]" aria-hidden />
+      <div className="ambient-glow ambient-glow-purple h-[500px] w-[500px] -left-[120px] -top-[80px]" aria-hidden />
+      <div className="ambient-glow ambient-glow-deep h-[420px] w-[420px] -right-[140px] top-[25%]" aria-hidden />
 
       <SideNav
         page={page}
