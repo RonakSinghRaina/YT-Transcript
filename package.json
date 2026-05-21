@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "build:pages": "vite build --base /YT-Transcript/ && node scripts/copy-404.mjs",
+    "dev": "node scripts/ensure-dev-index.mjs && vite",
+    "build": "node scripts/ensure-dev-index.mjs && vite build",
+    "build:pages": "node scripts/ensure-dev-index.mjs && vite build --base /YT-Transcript/ && node scripts/copy-404.mjs && node scripts/publish-static.mjs",
     "preview": "vite preview",
     "preview:pages": "vite preview --base /YT-Transcript/"
   },

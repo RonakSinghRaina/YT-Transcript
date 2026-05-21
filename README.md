@@ -54,13 +54,8 @@ The live site is at `https://ronaksinghraina.github.io/YT-Transcript/`.
 Your site was blank because GitHub Pages published **raw source** (`index.html` loading `/src/main.jsx`) instead of the Vite build. Two deploy workflows can run at once; the wrong one wins if this step is skipped.
 
 1. Open [Pages settings](https://github.com/RonakSinghRaina/YT-Transcript/settings/pages)
-2. Choose **one** of these (either works):
-
-   **Option A (recommended):** **Source** → **GitHub Actions** (uses `deploy-pages.yml`).
-
-   **Option B:** **Source** → **Deploy from a branch** → branch `main`, folder **`/docs`** (uses `publish-docs.yml` + committed build in `docs/`).
-
-   Do **not** use branch `main` with folder **`/` (root)** — that publishes raw source and causes a blank page.
+2. **Source** can be **GitHub Actions** (recommended) or **Deploy from a branch** → `main` → **`/` (root)**.  
+   The workflow commits the built `index.html` and `assets/` to the repo root on every push, so the deploy link in Actions always serves the real app.
 
 3. Wait for the latest workflow run to finish (green).
 4. Hard-refresh the site (`Ctrl+Shift+R`). View source should show `/YT-Transcript/assets/...js`, not `/src/main.jsx`.

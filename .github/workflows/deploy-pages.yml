@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   build:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,6 +39,21 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_TRANSCRIPT_API: ${{ secrets.VITE_TRANSCRIPT_API }}
 
+      - name: Publish static files to repo (root + docs)
+        run: node scripts/publish-static.mjs
+
+      - name: Commit built site for branch-based Pages
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore(pages): deploy static site [skip ci]'
+          file_pattern: |
+            index.html
+            404.html
+            .nojekyll
+            assets/**
+            docs/**
+          skip_dirty_check: true
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -45,6 +61,7 @@ jobs:
 
   deploy:
     needs: build
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
