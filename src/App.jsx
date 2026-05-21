@@ -251,7 +251,12 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="relative flex h-screen overflow-hidden bg-background">
+      <div className="noise-overlay" aria-hidden />
+      <div className="ambient-glow ambient-glow-purple h-[600px] w-[600px] -left-[100px] -top-[100px]" aria-hidden />
+      <div className="ambient-glow ambient-glow-blue h-[800px] w-[800px] -right-[200px] top-[20%]" aria-hidden />
+      <div className="ambient-glow ambient-glow-purple h-[500px] w-[500px] -bottom-[200px] left-[20%]" aria-hidden />
+
       <SideNav
         page={page}
         onNavigate={handleNavigate}
@@ -262,7 +267,7 @@ export default function App() {
         session={session}
       />
 
-      <main className="main-grain flex min-w-0 flex-1 flex-col">
+      <main className="relative z-10 flex min-w-0 flex-1 flex-col">
         <TopBar
           page={page}
           session={session}
@@ -288,11 +293,6 @@ export default function App() {
               message={message}
               onGenerate={generateTranscript}
               transcriptSearch={transcriptSearch}
-              onSegmentClick={() => {
-                setToastMessage('Transcript segment selected.');
-                setToastVisible(true);
-                setTimeout(() => setToastVisible(false), 3000);
-              }}
               inputRef={inputRef}
             />
           )}

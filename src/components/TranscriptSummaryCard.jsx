@@ -6,14 +6,14 @@ export default function TranscriptSummaryCard({ summary }) {
   const { overview, sections = [], source } = summary;
 
   return (
-    <div className="rounded-3xl border border-primary/5 bg-surface-container-low p-6 shadow-sm lg:p-8">
+    <div className="glass-panel rounded-3xl p-6 lg:p-8">
       <div className="mb-6 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-fixed-dim text-primary">
           <Icon name="auto_awesome" fill />
         </div>
         <div>
           <h3 className="text-lg font-semibold text-on-surface">Video Summary</h3>
-          <p className="text-xs text-secondary opacity-70">
+          <p className="text-xs text-on-surface-variant">
             {source === 'openai' ? 'AI-generated overview' : 'Smart excerpt — no timestamps'}
           </p>
         </div>
@@ -36,7 +36,7 @@ export default function TranscriptSummaryCard({ summary }) {
               {section.bullets.map((bullet) => (
                 <li
                   key={bullet}
-                  className="flex items-start gap-3 rounded-xl bg-white/70 px-3 py-2.5 text-sm leading-relaxed text-on-surface shadow-sm"
+                  className="flex items-start gap-3 rounded-xl border border-white/5 bg-white/5 px-3 py-2.5 text-sm leading-relaxed text-on-surface"
                 >
                   <Icon name="check_circle" className="mt-0.5 shrink-0 text-lg text-primary" fill />
                   <span>{bullet}</span>

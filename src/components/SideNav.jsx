@@ -9,89 +9,97 @@ const NAV = [
 
 export default function SideNav({ page, onNavigate, onGoHome, onNewTranscript, onLogout, onLogin, session }) {
   return (
-    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-outline-variant/20 bg-surface-container-low p-6 md:flex">
-      <div className="mb-10">
-        <button
-          type="button"
-          onClick={onGoHome}
-          className="text-left text-xl font-black text-primary transition-opacity hover:opacity-80"
-        >
-          TubeScribe
-        </button>
-      </div>
+    <aside className="relative z-20 hidden h-screen w-64 shrink-0 flex-col overflow-hidden border-r border-white/5 md:flex">
+      <div className="absolute inset-0 bg-gradient-to-b from-surface-container-low via-surface-container to-surface-container-low" />
+      <div className="absolute -left-24 top-0 h-48 w-48 rounded-full bg-primary/20 blur-[80px]" />
+      <div className="absolute -left-16 bottom-24 h-40 w-40 rounded-full bg-secondary/15 blur-[60px]" />
 
-      <nav className="flex flex-1 flex-col gap-1">
-        {NAV.map((item) => {
-          const active = page === item.id;
-          if (item.disabled) {
-            return (
-              <span
-                key={item.id}
-                className="flex cursor-not-allowed items-center gap-2 rounded-xl p-3 text-secondary/50"
-                title="Coming soon"
-              >
-                <Icon name={item.icon} />
-                <span className="text-xs font-semibold uppercase tracking-wide">{item.label}</span>
-              </span>
-            );
-          }
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onNavigate(item.id)}
-              className={`flex items-center gap-2 rounded-xl p-3 transition-all ${
-                active
-                  ? 'scale-[0.98] bg-primary-container text-on-primary-container'
-                  : 'text-secondary hover:bg-secondary-container'
-              }`}
-            >
-              <Icon name={item.icon} fill={active} />
-              <span className="text-xs font-semibold uppercase tracking-wide">{item.label}</span>
-            </button>
-          );
-        })}
-      </nav>
-
-      <div className="mt-auto flex flex-col gap-2">
-        <button
-          type="button"
-          onClick={onNewTranscript}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3 text-xs font-semibold uppercase tracking-wide text-on-primary hover:opacity-90"
-        >
-          <Icon name="add" className="text-lg" />
-          New Transcript
-        </button>
-        <div className="mt-4 flex flex-col gap-1 border-t border-outline-variant/30 pt-4">
+      <div className="relative flex h-full flex-col p-6">
+        <div className="mb-10">
           <button
             type="button"
-            onClick={() => onNavigate('help')}
-            className={`flex items-center gap-2 rounded-lg p-2 transition-colors ${
-              page === 'help' ? 'bg-secondary-container text-primary' : 'text-secondary hover:text-primary'
-            }`}
+            onClick={onGoHome}
+            className="text-left text-xl font-bold tracking-tight text-gradient-primary transition-opacity hover:opacity-80"
           >
-            <Icon name="help" className="text-xl" />
-            <span className="text-xs font-semibold uppercase tracking-wide">Help</span>
+            TubeScribe
           </button>
-          {session ? (
+        </div>
+
+        <nav className="flex flex-1 flex-col gap-1">
+          {NAV.map((item) => {
+            const active = page === item.id;
+            if (item.disabled) {
+              return (
+                <span
+                  key={item.id}
+                  className="flex cursor-not-allowed items-center gap-2 rounded-xl p-3 text-on-surface-variant/40"
+                  title="Coming soon"
+                >
+                  <Icon name={item.icon} />
+                  <span className="text-xs font-semibold uppercase tracking-wide">{item.label}</span>
+                </span>
+              );
+            }
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onNavigate(item.id)}
+                className={`flex items-center gap-2 rounded-xl p-3 transition-all duration-300 ${
+                  active
+                    ? 'scale-[0.98] border border-primary/20 bg-gradient-to-r from-primary-container/30 to-secondary-container/20 text-primary shadow-[0_0_20px_rgba(221,183,255,0.15)]'
+                    : 'text-on-surface-variant hover:border hover:border-white/5 hover:bg-white/5 hover:text-primary'
+                }`}
+              >
+                <Icon name={item.icon} fill={active} />
+                <span className="text-xs font-semibold uppercase tracking-wide">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="mt-auto flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={onNewTranscript}
+            className="btn-pulse flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary-container to-secondary-container py-3 text-xs font-semibold uppercase tracking-wide text-on-primary"
+          >
+            <Icon name="add" className="text-lg" />
+            New Transcript
+          </button>
+          <div className="mt-4 flex flex-col gap-1 border-t border-white/10 pt-4">
             <button
               type="button"
-              onClick={onLogout}
-              className="flex items-center gap-2 rounded-lg p-2 text-secondary hover:text-primary"
+              onClick={() => onNavigate('help')}
+              className={`flex items-center gap-2 rounded-lg p-2 transition-colors ${
+                page === 'help'
+                  ? 'bg-white/10 text-primary'
+                  : 'text-on-surface-variant hover:bg-white/5 hover:text-primary'
+              }`}
             >
-              <Icon name="logout" className="text-xl" />
-              <span className="text-xs font-semibold uppercase tracking-wide">Logout</span>
+              <Icon name="help" className="text-xl" />
+              <span className="text-xs font-semibold uppercase tracking-wide">Help</span>
             </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onLogin}
-              className="flex items-center gap-2 rounded-lg p-2 text-secondary hover:text-primary"
-            >
-              <Icon name="login" className="text-xl" />
-              <span className="text-xs font-semibold uppercase tracking-wide">Log in</span>
-            </button>
-          )}
+            {session ? (
+              <button
+                type="button"
+                onClick={onLogout}
+                className="flex items-center gap-2 rounded-lg p-2 text-on-surface-variant transition-colors hover:bg-white/5 hover:text-primary"
+              >
+                <Icon name="logout" className="text-xl" />
+                <span className="text-xs font-semibold uppercase tracking-wide">Logout</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onLogin}
+                className="flex items-center gap-2 rounded-lg p-2 text-on-surface-variant transition-colors hover:bg-white/5 hover:text-primary"
+              >
+                <Icon name="login" className="text-xl" />
+                <span className="text-xs font-semibold uppercase tracking-wide">Log in</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </aside>

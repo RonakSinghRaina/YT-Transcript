@@ -40,7 +40,7 @@ export default function NotificationBell({ notifications, onMarkAllRead, onOpenN
       <button
         type="button"
         onClick={toggleOpen}
-        className="relative rounded-full p-2 text-secondary transition-colors hover:bg-surface-container-high hover:text-primary"
+        className="relative rounded-full p-2 text-on-surface-variant transition-colors hover:bg-white/10 hover:text-primary"
         aria-label={`Notifications${unread ? `, ${unread} unread` : ''}`}
       >
         <Icon name="notifications" />
