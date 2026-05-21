@@ -49,10 +49,21 @@ The live site is at `https://ronaksinghraina.github.io/YT-Transcript/`.
 
 **Important:** GitHub Pages only hosts static files. The workflow in `.github/workflows/deploy-pages.yml` builds the Vite app and deploys the `dist/` folder (not raw source).
 
-### One-time GitHub setup
+### One-time GitHub setup (required — fixes blank page)
 
-1. Repo → **Settings** → **Pages** → **Build and deployment**
-2. Set **Source** to **GitHub Actions** (not “Deploy from branch” on the repo root).
+Your site was blank because GitHub Pages published **raw source** (`index.html` loading `/src/main.jsx`) instead of the Vite build. Two deploy workflows can run at once; the wrong one wins if this step is skipped.
+
+1. Open [Pages settings](https://github.com/RonakSinghRaina/YT-Transcript/settings/pages)
+2. Choose **one** of these (either works):
+
+   **Option A (recommended):** **Source** → **GitHub Actions** (uses `deploy-pages.yml`).
+
+   **Option B:** **Source** → **Deploy from a branch** → branch `main`, folder **`/docs`** (uses `publish-docs.yml` + committed build in `docs/`).
+
+   Do **not** use branch `main` with folder **`/` (root)** — that publishes raw source and causes a blank page.
+
+3. Wait for the latest workflow run to finish (green).
+4. Hard-refresh the site (`Ctrl+Shift+R`). View source should show `/YT-Transcript/assets/...js`, not `/src/main.jsx`.
 3. Repo → **Settings** → **Secrets and variables** → **Actions** → add:
 
 | Secret | Value |
