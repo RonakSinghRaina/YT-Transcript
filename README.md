@@ -19,9 +19,12 @@ SUPABASE_URL=
 SUPABASE_ANON_KEY=
 APIFY_TOKEN=
 APIFY_ACTOR_ID=prodiger/youtube-transcript-scraper---transcriber
-APIFY_TRANSCRIPT_METHOD=captions
+APIFY_TRANSCRIPT_METHOD=auto
 APIFY_PREFERRED_LANGUAGE=en
+OPENAI_API_KEY=
 ```
+
+`auto` uses YouTube captions when available, then Whisper when `OPENAI_API_KEY` is set. Without OpenAI, videos with no captions show a clear error instead of raw `no-captions`.
 
 The Supabase anon key is safe to use in browser code when row-level security is enabled. Keep `APIFY_TOKEN` server-only in Vercel environment variables.
 

@@ -3,9 +3,9 @@ import Icon from './Icon';
 import { formatDate } from '../lib/format';
 
 const TYPE_STYLES = {
-  success: 'text-primary bg-primary-fixed',
+  success: 'text-primary bg-primary/20',
   error: 'text-error bg-error-container',
-  info: 'text-secondary bg-surface-container-high',
+  info: 'text-primary bg-primary/15',
 };
 
 export default function NotificationBell({ notifications, onMarkAllRead, onOpenNotification }) {
@@ -53,17 +53,17 @@ export default function NotificationBell({ notifications, onMarkAllRead, onOpenN
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-lowest shadow-2xl sm:w-96">
-          <div className="flex items-center justify-between border-b border-outline-variant/20 px-4 py-3">
+        <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-white/10 bg-surface-container-lowest shadow-2xl sm:w-96">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
             <h3 className="text-sm font-bold text-on-surface">Notifications</h3>
             {notifications.length > 0 && (
-              <span className="text-xs text-secondary">{notifications.length} total</span>
+              <span className="text-xs text-primary">{notifications.length} total</span>
             )}
           </div>
 
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
-              <p className="px-4 py-8 text-center text-sm text-secondary">
+              <p className="px-4 py-8 text-center text-sm text-primary">
                 You&apos;ll see alerts here when a transcript finishes or fails.
               </p>
             ) : (
@@ -72,8 +72,8 @@ export default function NotificationBell({ notifications, onMarkAllRead, onOpenN
                   key={item.id}
                   type="button"
                   onClick={() => handleItemClick(item)}
-                  className={`flex w-full gap-3 border-b border-outline-variant/10 px-4 py-3 text-left transition-colors hover:bg-surface-container-low ${
-                    item.read ? 'opacity-80' : 'bg-surface-container-low/80'
+                  className={`flex w-full gap-3 border-b border-white/5 px-4 py-3 text-left transition-colors hover:bg-white/5 ${
+                    item.read ? 'opacity-85' : 'bg-primary/5'
                   }`}
                 >
                   <span
@@ -87,8 +87,8 @@ export default function NotificationBell({ notifications, onMarkAllRead, onOpenN
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold text-on-surface">{item.title}</span>
-                    <span className="mt-0.5 block text-xs leading-relaxed text-secondary">{item.message}</span>
-                    <span className="mt-1 block text-[10px] uppercase tracking-wide text-on-surface-variant">
+                    <span className="mt-0.5 block text-xs leading-relaxed text-primary">{item.message}</span>
+                    <span className="mt-1 block text-[10px] uppercase tracking-wide text-on-surface-variant/80">
                       {formatDate(item.createdAt)}
                     </span>
                   </span>
@@ -101,4 +101,3 @@ export default function NotificationBell({ notifications, onMarkAllRead, onOpenN
     </div>
   );
 }
-

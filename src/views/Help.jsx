@@ -36,7 +36,7 @@ const SECTIONS = [
       },
       {
         q: 'Can I search inside a transcript?',
-        a: 'Yes. Use the search bar in the header on the Dashboard to filter transcript segments on the right.',
+        a: 'Yes. Use the search bar in the header on the Dashboard to find saved transcripts by video title or any line from the transcript text.',
       },
       {
         q: 'How do notifications work?',
@@ -68,7 +68,7 @@ export default function Help({ onGoHome, onNewTranscript }) {
     <div className="mx-auto max-w-3xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-on-surface md:text-3xl">Help & support</h1>
-        <p className="mt-2 text-secondary">
+        <p className="mt-2 text-primary">
           Quick answers for using TubeScribe to turn YouTube videos into transcripts and summaries.
         </p>
       </div>
@@ -104,7 +104,7 @@ export default function Help({ onGoHome, onNewTranscript }) {
               {section.items.map((item) => (
                 <div key={item.q}>
                   <h3 className="text-sm font-semibold text-on-surface">{item.q}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-secondary">{item.a}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-primary">{item.a}</p>
                 </div>
               ))}
             </div>

@@ -3,7 +3,7 @@ import Icon from './Icon';
 const NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
   { id: 'history', label: 'History', icon: 'history' },
-  { id: 'favorites', label: 'Favorites', icon: 'star', disabled: true },
+  { id: 'favorites', label: 'Favorites', icon: 'star' },
   { id: 'settings', label: 'Settings', icon: 'settings' },
 ];
 
@@ -28,23 +28,11 @@ export default function SideNav({ page, onNavigate, onGoHome, onNewTranscript, o
         <nav className="flex flex-1 flex-col gap-1">
           {NAV.map((item) => {
             const active = page === item.id;
-            if (item.disabled) {
-              return (
-                <span
-                  key={item.id}
-                  className="flex cursor-not-allowed items-center gap-2 rounded-xl p-3 text-on-surface-variant/40"
-                  title="Coming soon"
-                >
-                  <Icon name={item.icon} />
-                  <span className="text-xs font-semibold uppercase tracking-wide">{item.label}</span>
-                </span>
-              );
-            }
             return (
               <button
                 key={item.id}
                 type="button"
-                onClick={() => onNavigate(item.id)}
+                onClick={() => (item.id === 'dashboard' ? onGoHome() : onNavigate(item.id))}
                 className={`flex items-center gap-2 rounded-xl p-3 transition-all duration-300 ${
                   active
                     ? 'scale-[0.98] border border-primary/25 bg-gradient-accent-soft text-primary shadow-[0_0_12px_rgba(124,58,237,0.12)]'

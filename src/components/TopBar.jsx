@@ -14,6 +14,7 @@ export default function TopBar({
   notifications,
   onMarkNotificationsRead,
   onOpenNotification,
+  onOpenSettings,
 }) {
   const email = session?.user?.email || '';
   const displayName = getDisplayName(session, profile);
@@ -39,15 +40,15 @@ export default function TopBar({
           </button>
           <span className="hidden text-outline-variant/60 sm:inline">|</span>
           <nav className="hidden min-w-0 items-center gap-2 sm:flex">
-            <button
-              type="button"
-              onClick={onGoHome}
-              className={`text-xs font-semibold uppercase tracking-wide transition-colors duration-300 hover:text-primary ${
-                page === 'dashboard' && !breadcrumbExtra ? 'text-primary' : 'text-on-surface-variant'
-              }`}
-            >
-              Dashboard
-            </button>
+          <button
+            type="button"
+            onClick={onGoHome}
+            className={`text-xs font-semibold uppercase tracking-wide transition-colors duration-300 hover:text-primary ${
+              page === 'dashboard' && !breadcrumbExtra ? 'text-primary' : 'text-on-surface-variant'
+            }`}
+          >
+            Home
+          </button>
             {breadcrumbExtra && (
               <>
                 <span className="text-outline-variant/50">/</span>
@@ -70,7 +71,7 @@ export default function TopBar({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Search transcript..."
+                placeholder="Search saved transcripts..."
                 className="glass-input w-44 rounded-full border-none py-2 pl-10 pr-4 text-sm text-on-surface placeholder:text-outline focus:ring-0 lg:w-56"
               />
             </div>
@@ -83,12 +84,15 @@ export default function TopBar({
           />
 
           {session ? (
-            <div
-              className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-primary/25 bg-gradient-accent-soft text-sm font-bold text-primary"
-              title={displayName}
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-primary/25 bg-gradient-accent-soft text-sm font-bold text-primary transition-transform hover:scale-105"
+              title={`${displayName} — Account settings`}
+              aria-label="Open account settings"
             >
               {initials}
-            </div>
+            </button>
           ) : (
             <button
               type="button"

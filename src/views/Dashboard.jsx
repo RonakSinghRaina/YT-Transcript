@@ -1,10 +1,14 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from '../components/Icon';
 import FeatureCards from '../components/FeatureCards';
+import HistorySearchResults from '../components/HistorySearchResults';
+import { isFavorite } from '../lib/favorites';
 import { getVideoId } from '../youtube';
 import TranscriptSummaryCard from '../components/TranscriptSummaryCard';
 import VideoPlayer from '../components/VideoPlayer';
 import { downloadTranscriptPdf, downloadTranscriptTxt } from '../lib/exportTranscript';
+import { fetchVideoSummary } from '../lib/fetchVideoSummary';
+import { loadPrefs } from '../lib/prefs';
 import { resolveVideoSummary, segmentsWithTimestamps } from '../lib/transcriptUtils';
 
 export default function Dashboard({
@@ -15,14 +19,24 @@ export default function Dashboard({
   loading,
   message,
   onGenerate,
-  transcriptSearch,
+  historySearch,
+  historySearchResults,
+  onOpenHistoryResult,
+  onClearHistorySearch,
+  onToggleFavorite,
+  onSummaryLoaded,
   inputRef,
 }) {
   const videoId = useMemo(() => getVideoId(videoUrl), [videoUrl]);
   const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
   const [activeSegment, setActiveSegment] = useState(0);
+  const [segmentSearch, setSegmentSearch] = useState('');
   const [copied, setCopied] = useState(false);
+  const [summary, setSummary] = useState(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState('');
   const videoRef = useRef(null);
+  const prefs = useMemo(() => loadPrefs(), []);
 
   const segments = useMemo(() => {
     if (!result?.transcript) return [];
@@ -30,12 +44,69 @@ export default function Dashboard({
   }, [result?.transcript]);
 
   const filteredSegments = useMemo(() => {
-    if (!transcriptSearch.trim()) return segments;
-    const q = transcriptSearch.toLowerCase();
+    if (!segmentSearch.trim()) return segments;
+    const q = segmentSearch.toLowerCase();
     return segments.filter((s) => s.body.toLowerCase().includes(q));
-  }, [segments, transcriptSearch]);
+  }, [segments, segmentSearch]);
 
-  const videoSummary = useMemo(() => resolveVideoSummary(result), [result]);
+  useEffect(() => {
+    setSummary(resolveVideoSummary(result));
+    setSummaryError('');
+  }, [result?.id, result?.summary]);
+
+  useEffect(() => {
+    if (!session?.access_token || !result?.transcript || !prefs.autoSummary) return;
+    if (resolveVideoSummary(result)) return;
+
+    let cancelled = false;
+    (async () => {
+      setSummaryLoading(true);
+      setSummaryError('');
+      try {
+        const fetched = await fetchVideoSummary({
+          accessToken: session.access_token,
+          transcriptId: result.id,
+          transcript: result.transcript,
+          title: result.title || '',
+        });
+        if (!cancelled && fetched?.overview) {
+          setSummary(fetched);
+          onSummaryLoaded?.(fetched);
+        }
+      } catch (error) {
+        if (!cancelled) setSummaryError(error.message || 'Summary failed.');
+      } finally {
+        if (!cancelled) setSummaryLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [result?.id, result?.transcript, session?.access_token, prefs.autoSummary, onSummaryLoaded]);
+
+  async function regenerateSummary() {
+    if (!session?.access_token || !result?.transcript) return;
+    setSummaryLoading(true);
+    setSummaryError('');
+    try {
+      const fetched = await fetchVideoSummary({
+        accessToken: session.access_token,
+        transcriptId: result.id,
+        transcript: result.transcript,
+        title: result.title || '',
+        force: true,
+      });
+      if (fetched?.overview) {
+        setSummary(fetched);
+        onSummaryLoaded?.(fetched);
+      }
+    } catch (error) {
+      setSummaryError(error.message || 'Summary failed.');
+    } finally {
+      setSummaryLoading(false);
+    }
+  }
 
   async function copyTranscript() {
     if (!result?.transcript) return;
@@ -117,6 +188,15 @@ export default function Dashboard({
           </p>
         )}
 
+        {session && historySearch.trim() && (
+          <HistorySearchResults
+            results={historySearchResults}
+            query={historySearch}
+            onOpen={onOpenHistoryResult}
+            onClear={onClearHistorySearch}
+          />
+        )}
+
         <FeatureCards />
       </div>
     );
@@ -127,6 +207,15 @@ export default function Dashboard({
 
   return (
     <div className="relative z-10 mx-auto max-w-[1600px] space-y-6">
+      {session && historySearch.trim() && (
+        <HistorySearchResults
+          results={historySearchResults}
+          query={historySearch}
+          onOpen={onOpenHistoryResult}
+          onClear={onClearHistorySearch}
+        />
+      )}
+
       {!result && loading && (
         <div className="glass-panel rounded-3xl p-12 text-center">
           <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-outline-variant border-t-primary" />
@@ -154,14 +243,34 @@ export default function Dashboard({
               videoUrl={result.video_url}
             />
 
-            <TranscriptSummaryCard summary={videoSummary} />
+            <TranscriptSummaryCard
+              summary={summary}
+              loading={summaryLoading}
+              error={summaryError}
+              onRegenerate={session ? regenerateSummary : null}
+            />
           </div>
 
           <div className="flex min-h-[600px] flex-col lg:col-span-5">
             <div className="glass-panel flex h-full flex-col overflow-hidden rounded-3xl">
-              <div className="flex items-center justify-between border-b border-white/5 p-4">
-                <h3 className="text-lg font-semibold text-on-surface">Transcript</h3>
-                <div className="flex gap-1">
+              <div className="border-b border-white/5 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-on-surface">Transcript</h3>
+                  <div className="flex gap-1">
+                  {onToggleFavorite && (
+                    <button
+                      type="button"
+                      onClick={() => onToggleFavorite(result)}
+                      className={`rounded-xl p-2 transition-colors ${
+                        isFavorite(result)
+                          ? 'bg-primary/15 text-primary'
+                          : 'text-on-surface-variant hover:bg-white/5 hover:text-primary'
+                      }`}
+                      title={isFavorite(result) ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                      <Icon name="star" className="text-lg" fill={isFavorite(result)} />
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={copyTranscript}
@@ -186,6 +295,20 @@ export default function Dashboard({
                   >
                     <Icon name="picture_as_pdf" />
                   </button>
+                </div>
+                </div>
+                <div className="relative">
+                  <Icon
+                    name="search"
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm"
+                  />
+                  <input
+                    type="text"
+                    value={segmentSearch}
+                    onChange={(e) => setSegmentSearch(e.target.value)}
+                    placeholder="Filter lines in this transcript..."
+                    className="glass-input w-full rounded-full py-2 pl-9 pr-3 text-sm"
+                  />
                 </div>
               </div>
 

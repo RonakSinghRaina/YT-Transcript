@@ -30,6 +30,9 @@ export default async function handler(req, res) {
       accessToken: token,
       videoUrl: body.videoUrl,
       includeTimestamps: body.includeTimestamps ?? true,
+      language: body.language ?? null,
+      summaryLength: body.summaryLength || 'medium',
+      autoSummary: body.autoSummary !== false,
     });
     json(res, 200, payload);
   } catch (error) {

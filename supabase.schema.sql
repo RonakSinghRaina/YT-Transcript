@@ -16,6 +16,7 @@ create table if not exists public.transcript_history (
   title text,
   transcript text not null,
   actor_run_id text,
+  is_favorite boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -48,5 +49,15 @@ on public.transcript_history for insert
 to authenticated
 with check (auth.uid() = user_id);
 
+create policy "Users can update their transcript history"
+on public.transcript_history for update
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
 create index if not exists transcript_history_user_created_idx
 on public.transcript_history(user_id, created_at desc);
+
+create index if not exists transcript_history_user_favorite_idx
+on public.transcript_history(user_id, is_favorite)
+where is_favorite = true;

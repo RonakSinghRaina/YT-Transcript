@@ -17,9 +17,20 @@ export function getVideoId(value) {
   return '';
 }
 
+const SKIP_REASON_MESSAGES = {
+  'no-captions':
+    'This video has no captions in the selected language. Add OPENAI_API_KEY on your server for Whisper audio transcription, or change Transcript language in Settings.',
+  'no-openai-key-no-fallback':
+    'This video has no captions. Add OPENAI_API_KEY to your server .env so TubeScribe can transcribe audio with Whisper.',
+};
+
 export function formatTranscriptError(message) {
   if (!message || message === 'Transcript generation failed.') {
     return 'Transcript generation failed. Check that you are logged in, the dev server is running, and APIFY_TOKEN is set in .env.';
+  }
+  if (SKIP_REASON_MESSAGES[message]) return SKIP_REASON_MESSAGES[message];
+  if (message === 'no-captions' || message.startsWith('no-captions')) {
+    return SKIP_REASON_MESSAGES['no-captions'];
   }
   return message;
 }

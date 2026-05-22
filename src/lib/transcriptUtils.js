@@ -1,6 +1,6 @@
-import { buildHeuristicSummary, stripTimestamps } from '../../lib/summary.mjs';
+import { stripTimestamps } from '../../lib/summary.mjs';
 
-export { stripTimestamps, buildHeuristicSummary };
+export { stripTimestamps };
 
 export function parseTimestampToSeconds(raw) {
   const parts = String(raw || '')
@@ -127,8 +127,8 @@ export function segmentsWithTimestamps(text) {
   });
 }
 
+/** Use only a stored summary from the API/DB — never synthesize on the client. */
 export function resolveVideoSummary(result) {
-  if (result?.summary?.sections?.length) return result.summary;
-  if (result?.transcript) return buildHeuristicSummary(result.transcript);
+  if (result?.summary?.overview) return result.summary;
   return null;
 }
