@@ -56,7 +56,12 @@ export default function Dashboard({
 
   useEffect(() => {
     if (!session?.access_token || !result?.transcript || !prefs.autoSummary) return;
-    if (resolveVideoSummary(result)) return;
+    const existing = resolveVideoSummary(result);
+    const needsRefresh =
+      existing?.source === 'extractive'
+      || /The (creator|speaker) (introduces|then discusses)/i.test(existing?.overview || '');
+
+    if (existing && !needsRefresh) return;
 
     let cancelled = false;
     (async () => {
@@ -68,6 +73,7 @@ export default function Dashboard({
           transcriptId: result.id,
           transcript: result.transcript,
           title: result.title || '',
+          force: needsRefresh,
         });
         if (!cancelled && fetched?.overview) {
           setSummary(fetched);
@@ -84,29 +90,6 @@ export default function Dashboard({
       cancelled = true;
     };
   }, [result?.id, result?.transcript, session?.access_token, prefs.autoSummary, onSummaryLoaded]);
-
-  async function regenerateSummary() {
-    if (!session?.access_token || !result?.transcript) return;
-    setSummaryLoading(true);
-    setSummaryError('');
-    try {
-      const fetched = await fetchVideoSummary({
-        accessToken: session.access_token,
-        transcriptId: result.id,
-        transcript: result.transcript,
-        title: result.title || '',
-        force: true,
-      });
-      if (fetched?.overview) {
-        setSummary(fetched);
-        onSummaryLoaded?.(fetched);
-      }
-    } catch (error) {
-      setSummaryError(error.message || 'Summary failed.');
-    } finally {
-      setSummaryLoading(false);
-    }
-  }
 
   async function copyTranscript() {
     if (!result?.transcript) return;
@@ -247,7 +230,6 @@ export default function Dashboard({
               summary={summary}
               loading={summaryLoading}
               error={summaryError}
-              onRegenerate={session ? regenerateSummary : null}
             />
           </div>
 
