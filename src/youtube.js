@@ -28,6 +28,12 @@ export function formatTranscriptError(message) {
   if (!message || message === 'Transcript generation failed.') {
     return 'Transcript generation failed. Check that you are logged in, the dev server is running, and APIFY_TOKEN is set in .env.';
   }
+  if (message.includes('405') || message.includes('Method Not Allowed')) {
+    return 'Transcript API is not available on GitHub Pages alone. Deploy the app to Vercel and set VITE_TRANSCRIPT_API in GitHub Actions secrets (see README).';
+  }
+  if (message.includes('PRODUCTION_API_NOT_CONFIGURED')) {
+    return 'Transcript API is not configured for the live site. Deploy to Vercel and set VITE_TRANSCRIPT_API in GitHub repository secrets, then redeploy.';
+  }
   if (SKIP_REASON_MESSAGES[message]) return SKIP_REASON_MESSAGES[message];
   if (message === 'no-captions' || message.startsWith('no-captions')) {
     return SKIP_REASON_MESSAGES['no-captions'];

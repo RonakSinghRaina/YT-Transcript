@@ -15,29 +15,20 @@ import { applyTranscriptionPrefs } from './lib/processTranscript';
 import {
   isFavorite,
   loadLocalFavoriteIds,
-  mergeFavoriteFlags,
-  saveLocalFavoriteIds,
+  clearLocalFavoriteIds,
+  applyFavoriteFlags,
+  probeFavoritesColumn,
+  setDbFavoritesSupported,
+  isDbFavoritesSupported,
+  setLocalFavorite,
 } from './lib/favorites';
+import { resolveTranscriptApi, PRODUCTION_API_SETUP_HINT } from './lib/apiConfig';
 import { searchHistoryItems } from './lib/searchHistory';
 import Dashboard from './views/Dashboard';
 import History from './views/History';
 import Favorites from './views/Favorites';
 import Settings from './views/Settings';
 import Help from './views/Help';
-
-function resolveTranscriptApi() {
-  if (import.meta.env.VITE_TRANSCRIPT_API) {
-    return import.meta.env.VITE_TRANSCRIPT_API;
-  }
-  if (import.meta.env.DEV) {
-    return '/api/transcript';
-  }
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  if (supabaseUrl) {
-    return `${supabaseUrl}/functions/v1/generate-transcript-v3`;
-  }
-  return '/api/transcript';
-}
 
 const TRANSCRIPT_API = resolveTranscriptApi();
 
@@ -58,6 +49,7 @@ export default function App() {
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [notifications, setNotifications] = useState([]);
+  const [favoritesSetupHint, setFavoritesSetupHint] = useState('');
   const inputRef = useRef(null);
 
   const breadcrumbExtra = result && page === 'dashboard' ? 'Current Transcript' : null;
@@ -104,21 +96,78 @@ export default function App() {
   useEffect(() => {
     if (!session?.user || !isSupabaseConfigured) {
       setHistory([]);
+      setFavoritesSetupHint('');
+      setDbFavoritesSupported(null);
       return;
     }
     refreshHistory();
     refreshProfile();
   }, [session?.user?.id]);
 
+  async function syncLocalFavoritesToDatabase(userId) {
+    if (!isDbFavoritesSupported()) return;
+    const local = loadLocalFavoriteIds();
+    if (!local.size) return;
+
+    await Promise.all(
+      [...local].map((id) =>
+        supabase
+          .from('transcript_history')
+          .update({ is_favorite: true })
+          .eq('id', id)
+          .eq('user_id', userId),
+      ),
+    );
+    clearLocalFavoriteIds();
+  }
+
   async function refreshHistory() {
+    if (!session?.user?.id) return;
     setHistoryLoading(true);
-    const { data } = await supabase
+    const userId = session.user.id;
+
+    const dbFavorites = await probeFavoritesColumn(supabase, userId);
+    setDbFavoritesSupported(dbFavorites);
+    setFavoritesSetupHint(
+      dbFavorites
+        ? ''
+        : 'Favorites are saved on this device until you add the is_favorite column in Supabase (see Help).',
+    );
+
+    await syncLocalFavoritesToDatabase(userId);
+
+    const recentRes = await supabase
       .from('transcript_history')
       .select('*')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .limit(48);
+      .limit(100);
 
-    setHistory(mergeFavoriteFlags(data || []));
+    let favoriteRows = [];
+    if (dbFavorites) {
+      const favoritesRes = await supabase
+        .from('transcript_history')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_favorite', true)
+        .order('created_at', { ascending: false });
+
+      if (!favoritesRes.error) {
+        favoriteRows = favoritesRes.data || [];
+      }
+    }
+
+    const byId = new Map();
+    for (const item of [...favoriteRows, ...(recentRes.data || [])]) {
+      byId.set(item.id, item);
+    }
+    const merged = applyFavoriteFlags(
+      [...byId.values()].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      ),
+    );
+
+    setHistory(merged);
     setHistoryLoading(false);
   }
 
@@ -171,18 +220,21 @@ export default function App() {
   }
 
   async function toggleFavorite(item) {
-    if (!item?.id) return;
+    if (!item?.id || !session?.user?.id) return;
     const next = !isFavorite(item);
-    const local = loadLocalFavoriteIds();
-    if (next) local.add(item.id);
-    else local.delete(item.id);
-    saveLocalFavoriteIds(local);
 
-    if (session && isSupabaseConfigured) {
-      await supabase
+    if (isDbFavoritesSupported()) {
+      const { error } = await supabase
         .from('transcript_history')
         .update({ is_favorite: next })
-        .eq('id', item.id);
+        .eq('id', item.id)
+        .eq('user_id', session.user.id);
+
+      if (error) {
+        setLocalFavorite(item.id, next);
+      }
+    } else {
+      setLocalFavorite(item.id, next);
     }
 
     setHistory((prev) =>
@@ -217,6 +269,11 @@ export default function App() {
       }
     }
 
+    if (!TRANSCRIPT_API) {
+      setMessage(PRODUCTION_API_SETUP_HINT);
+      return;
+    }
+
     setLoading(true);
     pushNotification(
       createNotification({
@@ -242,6 +299,9 @@ export default function App() {
       try {
         payload = await response.json();
       } catch {
+        if (response.status === 405) {
+          throw new Error('PRODUCTION_API_NOT_CONFIGURED');
+        }
         throw new Error(`Server error (${response.status}). Restart npm run dev and try again.`);
       }
       if (!response.ok) {
@@ -307,10 +367,7 @@ export default function App() {
 
   async function deleteHistoryItem(id) {
     if (!session || !confirm('Delete this transcript?')) return;
-    await supabase.from('transcript_history').delete().eq('id', id);
-    const local = loadLocalFavoriteIds();
-    local.delete(id);
-    saveLocalFavoriteIds(local);
+    await supabase.from('transcript_history').delete().eq('id', id).eq('user_id', session.user.id);
     if (result?.id === id) setResult(null);
     await refreshHistory();
   }
@@ -398,6 +455,7 @@ export default function App() {
             <Favorites
               history={favoriteHistory}
               loading={historyLoading}
+              setupHint={favoritesSetupHint}
               onOpen={openHistoryItem}
               onDelete={deleteHistoryItem}
               onToggleFavorite={toggleFavorite}

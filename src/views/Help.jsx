@@ -59,6 +59,10 @@ const SECTIONS = [
         q: 'Transcript is empty',
         a: 'The video may have no captions in your language. Try another video or check transcription settings.',
       },
+      {
+        q: 'Favorites empty after logging in again',
+        a: 'Open Supabase → SQL Editor and run the script file supabase-migrations/add_is_favorite.sql from this project (it adds the is_favorite column). Until you run it, starred videos are stored on this device only.',
+      },
     ],
   },
 ];

@@ -68,7 +68,19 @@ Your site was blank because GitHub Pages published **raw source** (`index.html` 
 |--------|--------|
 | `VITE_SUPABASE_URL` | Your Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon key |
-| `VITE_TRANSCRIPT_API` | Optional. Apify API URL on Vercel, e.g. `https://your-app.vercel.app/api/transcript`. If omitted, the app uses your Supabase edge function. |
+| `VITE_TRANSCRIPT_API` | **Required for Generate on GitHub Pages.** Your Vercel API URL, e.g. `https://your-app.vercel.app/api/transcript` (no trailing slash). |
+
+### GitHub Pages + Vercel API (fixes 405 on Generate)
+
+GitHub Pages only hosts the React UI. Transcript generation runs on **Vercel** (same repo):
+
+1. Sign in at [vercel.com](https://vercel.com) → **Add New Project** → import `YT-Transcript`.
+2. Add environment variables (same as local `.env` server keys): `APIFY_TOKEN`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `GEMINI_API_KEY`, etc. (not `VITE_*` only — add both `VITE_` and non-prefixed for server).
+3. Deploy. Copy your deployment URL, e.g. `https://yt-transcript-abc.vercel.app`.
+4. GitHub repo → **Settings** → **Secrets and variables** → **Actions** → set `VITE_TRANSCRIPT_API` to `https://yt-transcript-abc.vercel.app/api/transcript`.
+5. Push to `main` (or re-run **Deploy to GitHub Pages** workflow).
+
+Local dev still uses `npm run dev` (`/api/transcript` on the Vite server).
 
 4. Push to `main`. The **Deploy to GitHub Pages** workflow runs automatically.
 

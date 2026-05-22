@@ -1,8 +1,8 @@
 import { loadPrefs } from './prefs.js';
+import { resolveSummaryApi } from './apiConfig.js';
 
 export function getSummaryApiUrl() {
-  const base = import.meta.env.VITE_TRANSCRIPT_API || '/api/transcript';
-  return base.replace(/\/transcript\/?$/, '/summary');
+  return resolveSummaryApi() || '/api/summary';
 }
 
 export async function fetchVideoSummary({
