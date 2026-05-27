@@ -53,11 +53,11 @@ export default function FeatureCards() {
         </p>
       </div>
 
-      <div className="grid auto-rows-[200px] grid-cols-1 gap-6 md:grid-cols-3 md:auto-rows-[240px]">
+      <div className="grid auto-rows-[220px] grid-cols-1 gap-6 md:grid-cols-3 md:auto-rows-[240px]">
         {FEATURES.map((feature) => (
           <div
             key={feature.title}
-            className={`glass-panel float-card group relative flex flex-col justify-between overflow-hidden rounded-3xl p-8 ${feature.wide ? 'md:col-span-2' : ''} ${feature.float}`}
+            className={`glass-panel float-card group relative flex h-full flex-col justify-center overflow-hidden rounded-3xl px-8 py-7 ${feature.wide ? 'md:col-span-2' : ''} ${feature.float}`}
           >
             {feature.glow && (
               <div

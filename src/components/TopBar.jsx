@@ -1,6 +1,7 @@
 import Icon from './Icon';
 import NotificationBell from './NotificationBell';
 import { getDisplayName, getInitials } from '../lib/profile';
+import BrandLogo from './BrandLogo';
 
 export default function TopBar({
   page,
@@ -15,6 +16,7 @@ export default function TopBar({
   onMarkNotificationsRead,
   onOpenNotification,
   onOpenSettings,
+  onOpenMobileNav,
 }) {
   const email = session?.user?.email || '';
   const displayName = getDisplayName(session, profile);
@@ -26,17 +28,25 @@ export default function TopBar({
         <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <button
             type="button"
-            onClick={onGoHome}
-            className="font-bold text-gradient-primary transition-opacity hover:opacity-80 md:hidden"
+            onClick={onOpenMobileNav}
+            className="rounded-xl p-2 text-on-surface-variant transition-colors hover:bg-white/5 hover:text-primary md:hidden"
+            aria-label="Open menu"
           >
-            TS
+            <Icon name="menu" />
           </button>
           <button
             type="button"
             onClick={onGoHome}
-            className="hidden font-bold tracking-tight text-gradient-primary transition-opacity hover:opacity-80 md:block"
+            className="transition-opacity hover:opacity-80 md:hidden"
           >
-            TubeScribe
+            <BrandLogo size="sm" />
+          </button>
+          <button
+            type="button"
+            onClick={onGoHome}
+            className="hidden transition-opacity hover:opacity-80 md:block"
+          >
+            <BrandLogo size="md" />
           </button>
           <span className="hidden text-outline-variant/60 sm:inline">|</span>
           <nav className="hidden min-w-0 items-center gap-2 sm:flex">

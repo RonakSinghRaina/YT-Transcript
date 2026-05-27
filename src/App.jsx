@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import AuthModal from './components/AuthModal';
+import MobileNav from './components/MobileNav';
 import SideNav from './components/SideNav';
 import Toast from './components/Toast';
 import TopBar from './components/TopBar';
@@ -50,6 +51,7 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState('');
   const [notifications, setNotifications] = useState([]);
   const [favoritesSetupHint, setFavoritesSetupHint] = useState('');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const inputRef = useRef(null);
 
   const breadcrumbExtra = result && page === 'dashboard' ? 'Current Transcript' : null;
@@ -391,6 +393,7 @@ export default function App() {
     }
     setPage(nextPage);
     setMessage('');
+    setMobileNavOpen(false);
   }
 
   return (
@@ -408,6 +411,17 @@ export default function App() {
         onLogin={() => openAuth('login')}
         session={session}
       />
+      <MobileNav
+        open={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
+        page={page}
+        onNavigate={handleNavigate}
+        onGoHome={goHome}
+        onNewTranscript={handleNewTranscript}
+        session={session}
+        onLogout={logout}
+        onLogin={() => openAuth('login')}
+      />
 
       <main className="relative z-10 flex min-w-0 flex-1 flex-col">
         <TopBar
@@ -423,6 +437,7 @@ export default function App() {
           notifications={notifications}
           onMarkNotificationsRead={markNotificationsRead}
           onOpenNotification={handleOpenNotification}
+          onOpenMobileNav={() => setMobileNavOpen(true)}
         />
 
         <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10">

@@ -122,6 +122,13 @@
     background-clip: text;
   }
 
+  .text-gradient-scribe {
+    background: linear-gradient(90deg, #f3e8ff 0%, #c4b5fd 45%, #8b5cf6 75%, #6d28d9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
   .bg-gradient-accent {
     background: linear-gradient(135deg, #9b5de5 0%, #7c3aed 100%);
   }

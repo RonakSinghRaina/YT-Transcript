@@ -51,6 +51,9 @@ async function createWindow() {
     minWidth: 900,
     minHeight: 600,
     title: 'TubeScribe',
+    icon: isDev
+      ? path.join(__dirname, '..', 'public', 'brand', 'tubescribe-icon.png')
+      : path.join(app.getAppPath(), 'public', 'brand', 'tubescribe-icon.png'),
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),

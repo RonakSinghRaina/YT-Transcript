@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import Icon from '../components/Icon';
 import { getDisplayName, getInitials } from '../lib/profile';
-import { trialDaysLeft } from '../lib/format';
 import { DEFAULT_PREFS, loadPrefs, savePrefs } from '../lib/prefs';
 import {
   requestBrowserNotificationPermission,
@@ -34,7 +33,6 @@ export default function Settings({ session, profile, onProfileUpdate, initialTab
   const [prefsSaved, setPrefsSaved] = useState(false);
   const [notifyStatus, setNotifyStatus] = useState('');
 
-  const daysLeft = trialDaysLeft(profile?.trialEndsAt);
   const email = session?.user?.email || 'Not signed in';
   const initials = getInitials(displayName, email);
 
@@ -176,9 +174,9 @@ export default function Settings({ session, profile, onProfileUpdate, initialTab
               </div>
               <div className="mt-8 flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-4">
                 <div>
-                  <h4 className="font-bold text-on-surface">{daysLeft > 0 ? 'Unlimited trial' : 'Free plan'}</h4>
+                  <h4 className="font-bold text-on-surface">Free forever plan</h4>
                   <p className="text-sm text-primary">
-                    {daysLeft > 0 ? `${daysLeft} days of unlimited transcripts remaining.` : '1 transcript per day after trial.'}
+                    Unlimited transcripts. No daily credits, no trial expiry.
                   </p>
                 </div>
               </div>

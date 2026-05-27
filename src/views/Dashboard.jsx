@@ -151,7 +151,7 @@ export default function Dashboard({
           <form onSubmit={onGenerate} className="w-full">
             <button
               type="submit"
-              disabled={loading || !videoId}
+              disabled={loading}
               className="btn-pulse flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-accent text-sm font-bold text-on-primary-container disabled:opacity-50"
             >
               {loading ? (
@@ -193,7 +193,7 @@ export default function Dashboard({
         </div>
 
         <form onSubmit={onGenerate} className="w-full max-w-3xl mx-auto">
-          <div className="glass-panel flex flex-col items-stretch gap-2 rounded-full p-2 shadow-[0_4px_24px_0_rgba(0,0,0,0.4)] transition-shadow duration-300 hover:shadow-[0_4px_28px_0_rgba(124,58,237,0.15)] sm:flex-row sm:items-center">
+          <div className="glass-panel flex flex-col items-stretch gap-2 rounded-[30px] p-2 shadow-[0_4px_24px_0_rgba(0,0,0,0.4)] transition-shadow duration-300 hover:shadow-[0_4px_28px_0_rgba(124,58,237,0.15)] sm:rounded-full sm:flex-row sm:items-center">
             <div className="relative flex flex-1 items-center">
               <Icon
                 name="link"
@@ -210,8 +210,8 @@ export default function Dashboard({
             </div>
             <button
               type="submit"
-              disabled={loading || !videoId}
-              className="btn-pulse flex h-14 shrink-0 items-center justify-center gap-2 rounded-full bg-gradient-accent px-8 text-sm font-bold tracking-wide text-on-primary-container disabled:opacity-50"
+              disabled={loading}
+              className="btn-pulse flex h-14 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-gradient-accent px-8 text-sm font-bold tracking-wide text-on-primary-container disabled:opacity-50 sm:w-auto"
             >
               {loading ? (
                 <Icon name="progress_activity" className="animate-spin" />

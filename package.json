@@ -10,11 +10,12 @@
     "dev": "node scripts/ensure-dev-index.mjs && vite",
     "build": "node scripts/ensure-dev-index.mjs && vite build",
     "build:pages": "node scripts/ensure-dev-index.mjs && vite build --base /YT-Transcript/ && node scripts/copy-404.mjs && node scripts/publish-static.mjs",
+    "gen:icons": "node scripts/generate-icons.mjs",
     "build:desktop": "node scripts/prepare-desktop-env.mjs && node scripts/write-electron-api-origin.mjs && node scripts/ensure-dev-index.mjs && vite build --mode desktop",
     "preview": "vite preview",
     "preview:pages": "vite preview --base /YT-Transcript/",
     "electron:dev": "node scripts/electron-dev.mjs",
-    "dist:win": "npm run build:desktop && electron-builder --win nsis",
+    "dist:win": "npm run gen:icons && npm run build:desktop && electron-builder --win nsis",
     "build:extension": "node scripts/prepare-extension-env.mjs && vite build --mode extension && node scripts/copy-extension-assets.mjs"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
     "@tailwindcss/vite": "^4.3.0",
     "electron": "^35.0.0",
     "electron-builder": "^25.1.8",
+    "png-to-ico": "^2.1.8",
     "tailwindcss": "^4.3.0"
   },
   "build": {
@@ -47,6 +49,7 @@
     ],
     "asar": true,
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         {
           "target": "nsis",

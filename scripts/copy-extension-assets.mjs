@@ -23,5 +23,9 @@ copyFile(
   path.join(root, 'extension/content/youtube-bridge.js'),
   path.join(out, 'content/youtube-bridge.js'),
 );
+copyFile(
+  path.join(root, 'extension/icons/icon-128.png'),
+  path.join(out, 'icons/icon-128.png'),
+);
 
-console.log('Copied manifest, injected script, and content script to dist-extension/');
+console.log('Copied manifest, scripts, and icons to dist-extension/');

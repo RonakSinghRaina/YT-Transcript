@@ -18,7 +18,13 @@
     "default_path": "extension/sidepanel.html"
   },
   "action": {
-    "default_title": "Open TubeScribe"
+    "default_title": "Open TubeScribe",
+    "default_icon": {
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "128": "icons/icon-128.png"
   },
   "content_scripts": [
     {

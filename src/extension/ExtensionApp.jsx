@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AuthModal from '../components/AuthModal';
+import BrandLogo from '../components/BrandLogo';
 import Icon from '../components/Icon';
 import Toast from '../components/Toast';
 import { isSupabaseConfigured, supabase } from '../supabaseClient';
@@ -251,9 +252,7 @@ export default function ExtensionApp() {
   return (
     <div className="relative flex h-screen flex-col overflow-hidden bg-background">
       <header className="relative z-20 flex shrink-0 items-center justify-between border-b border-white/5 px-4 py-3">
-        <button type="button" onClick={goHome} className="text-lg font-bold text-gradient-primary">
-          TubeScribe
-        </button>
+        <BrandLogo size="sm" onClick={goHome} />
         {session ? (
           <button
             type="button"

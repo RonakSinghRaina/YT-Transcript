@@ -45,7 +45,7 @@ export const DESKTOP_API_MISSING_HINT =
 export function resolveSummaryApi() {
   const transcriptApi = resolveTranscriptApi();
   if (!transcriptApi) return null;
-  if (transcriptApi === '/api/transcript' || transcriptApi.endsWith('/api/transcript')) {
+  if (transcriptApi === '/api/transcript') {
     return '/api/summary';
   }
   if (transcriptApi.endsWith('/transcript')) {

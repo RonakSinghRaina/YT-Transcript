@@ -1,4 +1,5 @@
 import Icon from './Icon';
+import BrandLogo from './BrandLogo';
 
 const NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -16,13 +17,7 @@ export default function SideNav({ page, onNavigate, onGoHome, onNewTranscript, o
 
       <div className="relative flex h-full flex-col p-6">
         <div className="mb-10">
-          <button
-            type="button"
-            onClick={onGoHome}
-            className="text-left text-xl font-bold tracking-tight text-gradient-primary transition-opacity hover:opacity-80"
-          >
-            TubeScribe
-          </button>
+          <BrandLogo size="lg" onClick={onGoHome} />
         </div>
 
         <nav className="flex flex-1 flex-col gap-1">
