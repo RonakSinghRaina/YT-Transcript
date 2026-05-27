@@ -1,28 +1,64 @@
+function isRealApiUrl(url) {
+  return Boolean(url) && !url.includes('your-app') && !url.includes('your-vercel');
+}
+
+function normalizeApiUrl(url) {
+  return String(url || '').trim().replace(/\/$/, '');
+}
+
+function isDesktopClient() {
+  return (
+    import.meta.env.VITE_IS_DESKTOP === 'true'
+    || (typeof window !== 'undefined' && window.tubescribeDesktop)
+  );
+}
+
+function isExtensionClient() {
+  return import.meta.env.VITE_IS_EXTENSION === 'true';
+}
+
 /**
- * Transcript/summary APIs run on a server (Vite dev middleware or Vercel).
- * GitHub Pages is static only — set VITE_TRANSCRIPT_API at build time to your Vercel URL.
+ * Desktop + dev use same-origin /api (Vite or Electron proxy → Vercel).
+ * GitHub Pages uses the full Vercel URL baked at build time.
  */
 export function resolveTranscriptApi() {
-  const custom = String(import.meta.env.VITE_TRANSCRIPT_API || '').trim();
-  if (custom) {
-    return custom.replace(/\/$/, '');
+  if (isExtensionClient()) {
+    const custom = normalizeApiUrl(import.meta.env.VITE_TRANSCRIPT_API);
+    return isRealApiUrl(custom) ? custom : null;
   }
 
-  if (import.meta.env.DEV) {
+  if (import.meta.env.DEV || isDesktopClient()) {
     return '/api/transcript';
+  }
+
+  const custom = normalizeApiUrl(import.meta.env.VITE_TRANSCRIPT_API);
+  if (isRealApiUrl(custom)) {
+    return custom;
   }
 
   return null;
 }
 
+export const DESKTOP_API_MISSING_HINT =
+  'Set VITE_TRANSCRIPT_API in .env.desktop to your Vercel URL, then run npm run build:desktop again.';
+
 export function resolveSummaryApi() {
   const transcriptApi = resolveTranscriptApi();
   if (!transcriptApi) return null;
+  if (transcriptApi === '/api/transcript' || transcriptApi.endsWith('/api/transcript')) {
+    return '/api/summary';
+  }
   if (transcriptApi.endsWith('/transcript')) {
     return transcriptApi.replace(/\/transcript$/, '/summary');
   }
   return `${transcriptApi}/summary`;
 }
 
-export const PRODUCTION_API_SETUP_HINT =
-  'GitHub Pages cannot run the transcript API. Deploy this repo to Vercel (free), add APIFY_TOKEN and other server env vars there, then add GitHub secret VITE_TRANSCRIPT_API = https://YOUR-APP.vercel.app/api/transcript and redeploy Pages.';
+export const EXTENSION_API_MISSING_HINT =
+  'Set VITE_TRANSCRIPT_API in .env.extension to your Vercel URL, then run npm run build:extension.';
+
+export const PRODUCTION_API_SETUP_HINT = isExtensionClient()
+  ? EXTENSION_API_MISSING_HINT
+  : isDesktopClient()
+    ? DESKTOP_API_MISSING_HINT
+    : 'GitHub Pages cannot run the transcript API. Deploy to Vercel and set VITE_TRANSCRIPT_API in GitHub Actions secrets.';

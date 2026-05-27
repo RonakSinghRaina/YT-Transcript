@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -54,6 +56,10 @@ function transcriptApiPlugin() {
           const payload = await generateTranscript({
             accessToken,
             videoUrl: body.videoUrl,
+            clientTranscript: body.clientTranscript ?? null,
+            clientTitle: body.clientTitle ?? null,
+            clientDescription: body.clientDescription ?? null,
+            captionsOnly: body.captionsOnly === true,
             includeTimestamps: body.includeTimestamps ?? true,
             language: body.language ?? null,
             summaryLength: body.summaryLength || 'medium',
@@ -72,20 +78,85 @@ function transcriptApiPlugin() {
   };
 }
 
-export default defineConfig(({ mode }) => {
+function loadMergedEnv(mode) {
   const env = loadEnv(mode, process.cwd(), '');
+  const desktopPath = path.join(process.cwd(), '.env.desktop');
+  if (fs.existsSync(desktopPath)) {
+    Object.assign(env, loadEnv('desktop', process.cwd(), ''));
+  }
+  const extensionPath = path.join(process.cwd(), '.env.extension');
+  if (mode === 'extension' && fs.existsSync(extensionPath)) {
+    Object.assign(env, loadEnv('extension', process.cwd(), ''));
+  }
   Object.assign(process.env, env);
+  return env;
+}
 
-  // GitHub Pages serves at https://<user>.github.io/<repo-name>/
-  const base = env.VITE_BASE_PATH || '/';
+function vercelProxyTarget(apiUrl) {
+  const trimmed = String(apiUrl || '').trim();
+  if (!trimmed || trimmed.includes('your-app')) return null;
+  try {
+    return new URL(trimmed).origin;
+  } catch {
+    return null;
+  }
+}
+
+export default defineConfig(({ mode }) => {
+  const env = loadMergedEnv(mode);
+  const isDesktop = mode === 'desktop';
+  const isExtension = mode === 'extension';
+
+  if (isExtension) {
+    return {
+      base: './',
+      define: {
+        'import.meta.env.VITE_IS_EXTENSION': JSON.stringify('true'),
+      },
+      build: {
+        outDir: 'dist-extension',
+        emptyOutDir: true,
+        rollupOptions: {
+          input: {
+            sidepanel: path.resolve(process.cwd(), 'extension/sidepanel.html'),
+            background: path.resolve(process.cwd(), 'extension/background.js'),
+          },
+          output: {
+            entryFileNames: (chunkInfo) => {
+              if (chunkInfo.name === 'background') return 'background.js';
+              return 'assets/[name]-[hash].js';
+            },
+            chunkFileNames: 'assets/[name]-[hash].js',
+            assetFileNames: 'assets/[name]-[hash][extname]',
+          },
+        },
+      },
+      plugins: [react(), tailwindcss()],
+      ssr: {
+        external: ['ws'],
+      },
+    };
+  }
+
+  const base = isDesktop ? './' : env.VITE_BASE_PATH || '/';
+  const proxyTarget = vercelProxyTarget(env.VITE_TRANSCRIPT_API);
+  const useVercelProxy = mode === 'development' && Boolean(proxyTarget);
 
   return {
     base,
     plugins: [
       react(),
       tailwindcss(),
-      ...(mode === 'development' ? [transcriptApiPlugin()] : []),
+      ...(mode === 'development' && !useVercelProxy ? [transcriptApiPlugin()] : []),
     ],
+    server: useVercelProxy
+      ? {
+          proxy: {
+            '/api/transcript': { target: proxyTarget, changeOrigin: true, secure: true },
+            '/api/summary': { target: proxyTarget, changeOrigin: true, secure: true },
+          },
+        }
+      : undefined,
     ssr: {
       external: ['ws'],
     },

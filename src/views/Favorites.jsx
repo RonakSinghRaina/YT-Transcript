@@ -1,6 +1,6 @@
 import History from './History';
 
-export default function Favorites({ setupHint, ...props }) {
+export default function Favorites({ setupHint, showMigrationHint = true, ...props }) {
   return (
     <div>
       <div className="mb-6">
@@ -8,7 +8,7 @@ export default function Favorites({ setupHint, ...props }) {
         <p className="mt-2 text-sm text-primary">
           Transcripts you have starred for quick access.
         </p>
-        {setupHint && (
+        {showMigrationHint && setupHint && (
           <p className="mt-3 rounded-lg border border-primary/25 bg-primary/10 px-3 py-2 text-xs text-on-surface/90">
             {setupHint} In Supabase → SQL Editor, run the script from{' '}
             <code className="text-primary">supabase-migrations/add_is_favorite.sql</code>{' '}

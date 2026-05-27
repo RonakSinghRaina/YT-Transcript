@@ -9,7 +9,12 @@ import VideoPlayer from '../components/VideoPlayer';
 import { downloadTranscriptPdf, downloadTranscriptTxt } from '../lib/exportTranscript';
 import { fetchVideoSummary } from '../lib/fetchVideoSummary';
 import { loadPrefs } from '../lib/prefs';
-import { resolveVideoSummary, segmentsWithTimestamps } from '../lib/transcriptUtils';
+import {
+  formatTranscriptPlain,
+  formatTranscriptTimestamped,
+  resolveVideoSummary,
+  segmentsWithTimestamps,
+} from '../lib/transcriptUtils';
 
 export default function Dashboard({
   session,
@@ -25,7 +30,9 @@ export default function Dashboard({
   onClearHistorySearch,
   onToggleFavorite,
   onSummaryLoaded,
+  onSegmentSeek,
   inputRef,
+  variant = 'web',
 }) {
   const videoId = useMemo(() => getVideoId(videoUrl), [videoUrl]);
   const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
@@ -35,7 +42,9 @@ export default function Dashboard({
   const [summary, setSummary] = useState(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryError, setSummaryError] = useState('');
+  const [transcriptViewMode, setTranscriptViewMode] = useState('segments');
   const videoRef = useRef(null);
+  const videoSectionRef = useRef(null);
   const prefs = useMemo(() => loadPrefs(), []);
 
   const segments = useMemo(() => {
@@ -91,9 +100,18 @@ export default function Dashboard({
     };
   }, [result?.id, result?.transcript, session?.access_token, prefs.autoSummary, onSummaryLoaded]);
 
+  const paragraphText = useMemo(
+    () => formatTranscriptPlain(filteredSegments),
+    [filteredSegments],
+  );
+
   async function copyTranscript() {
-    if (!result?.transcript) return;
-    await navigator.clipboard.writeText(result.transcript);
+    if (!segments.length) return;
+    const text =
+      transcriptViewMode === 'paragraph'
+        ? paragraphText
+        : formatTranscriptTimestamped(segments);
+    await navigator.clipboard.writeText(text || result?.transcript || '');
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   }
@@ -102,11 +120,64 @@ export default function Dashboard({
     setActiveSegment(index);
     const seg = segments[index];
     if (seg?.seconds != null) {
-      videoRef.current?.seekTo(seg.seconds);
+      if (onSegmentSeek) {
+        onSegmentSeek(seg.seconds);
+      } else {
+        videoRef.current?.seekTo(seg.seconds);
+        videoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   }
 
   if (!result && !loading) {
+    if (variant === 'extension') {
+      return (
+        <div className="relative z-10 mx-auto max-w-4xl space-y-6 py-2">
+          <div className="text-center">
+            <h1 className="text-xl font-bold tracking-tight text-on-surface">
+              Paste a video. Get a clean{' '}
+              <span className="text-gradient-primary">transcript</span>.
+            </h1>
+          </div>
+
+          {thumbnail && (
+            <img
+              src={thumbnail}
+              alt=""
+              className="aspect-video w-full rounded-2xl border border-white/10 object-cover"
+            />
+          )}
+
+          <form onSubmit={onGenerate} className="w-full">
+            <button
+              type="submit"
+              disabled={loading || !videoId}
+              className="btn-pulse flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-accent text-sm font-bold text-on-primary-container disabled:opacity-50"
+            >
+              {loading ? (
+                <Icon name="progress_activity" className="animate-spin" />
+              ) : (
+                <Icon name="auto_awesome" />
+              )}
+              Generate transcript
+            </button>
+          </form>
+
+          {message && (
+            <p className="rounded-2xl border border-error/30 bg-error-container/30 px-4 py-3 text-center text-sm text-error">
+              {message}
+            </p>
+          )}
+
+          {!session && (
+            <p className="text-center text-sm text-on-surface-variant">
+              Log in to save transcripts to your workspace.
+            </p>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className="relative z-10 mx-auto max-w-4xl space-y-10 py-4">
         <div className="relative text-center">
@@ -216,15 +287,44 @@ export default function Dashboard({
       )}
 
       {result && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
-          <div className="space-y-6 lg:col-span-7">
-            <VideoPlayer
-              ref={videoRef}
-              key={activeVideoId}
-              videoId={activeVideoId}
-              title={displayTitle}
-              videoUrl={result.video_url}
-            />
+        <div
+          className={`grid grid-cols-1 gap-6 ${
+            variant === 'extension' ? '' : 'lg:grid-cols-12 lg:gap-8'
+          }`}
+        >
+          <div
+            ref={videoSectionRef}
+            className={`space-y-6 ${variant === 'extension' ? '' : 'lg:col-span-7'}`}
+          >
+            {variant === 'extension' ? (
+              <a
+                href={result.video_url || `https://www.youtube.com/watch?v=${activeVideoId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="glass-panel block overflow-hidden rounded-3xl transition-opacity hover:opacity-90"
+              >
+                <img
+                  src={`https://img.youtube.com/vi/${activeVideoId}/hqdefault.jpg`}
+                  alt=""
+                  className="aspect-video w-full object-cover"
+                />
+                <div className="p-4">
+                  <h2 className="text-lg font-semibold text-on-surface">{displayTitle}</h2>
+                  <p className="mt-1 flex items-center gap-1 text-sm text-primary">
+                    <Icon name="open_in_new" className="text-base" />
+                    Playing on YouTube tab
+                  </p>
+                </div>
+              </a>
+            ) : (
+              <VideoPlayer
+                ref={videoRef}
+                key={activeVideoId}
+                videoId={activeVideoId}
+                title={displayTitle}
+                videoUrl={result.video_url}
+              />
+            )}
 
             <TranscriptSummaryCard
               summary={summary}
@@ -233,12 +333,40 @@ export default function Dashboard({
             />
           </div>
 
-          <div className="flex min-h-[600px] flex-col lg:col-span-5">
+          <div
+            className={`flex flex-col ${
+              variant === 'extension' ? 'min-h-[400px]' : 'min-h-[600px] lg:col-span-5'
+            }`}
+          >
             <div className="glass-panel flex h-full flex-col overflow-hidden rounded-3xl">
               <div className="border-b border-white/5 p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-on-surface">Transcript</h3>
                   <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setTranscriptViewMode('segments')}
+                    className={`rounded-xl p-2 transition-colors ${
+                      transcriptViewMode === 'segments'
+                        ? 'bg-primary/15 text-primary'
+                        : 'text-on-surface-variant hover:bg-white/5 hover:text-primary'
+                    }`}
+                    title="Timestamped lines"
+                  >
+                    <Icon name="schedule" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTranscriptViewMode('paragraph')}
+                    className={`rounded-xl p-2 transition-colors ${
+                      transcriptViewMode === 'paragraph'
+                        ? 'bg-primary/15 text-primary'
+                        : 'text-on-surface-variant hover:bg-white/5 hover:text-primary'
+                    }`}
+                    title="Single paragraph"
+                  >
+                    <Icon name="subject" />
+                  </button>
                   {onToggleFavorite && (
                     <button
                       type="button"
@@ -295,7 +423,15 @@ export default function Dashboard({
               </div>
 
               <div className="flex-1 space-y-4 overflow-y-auto px-4 py-3">
-                {filteredSegments.length ? (
+                {transcriptViewMode === 'paragraph' ? (
+                  paragraphText ? (
+                    <p className="text-sm leading-relaxed text-on-surface/90">{paragraphText}</p>
+                  ) : (
+                    <p className="py-8 text-center text-sm text-on-surface-variant">
+                      No matching text.
+                    </p>
+                  )
+                ) : filteredSegments.length ? (
                   filteredSegments.map((seg) => {
                     const segIndex = segments.indexOf(seg);
                     const isActive = segIndex === activeSegment;

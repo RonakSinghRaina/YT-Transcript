@@ -345,7 +345,11 @@ export default function App() {
       setToastVisible(true);
       setTimeout(() => setToastVisible(false), 3500);
     } catch (error) {
-      const errMsg = formatTranscriptError(error.message);
+      let errMsg = formatTranscriptError(error.message);
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        errMsg =
+          'Could not reach the transcript server. If using the desktop app: close it, run npm run electron:dev again, and ensure Vercel is redeployed with the latest code. Also check APIFY_TOKEN on Vercel.';
+      }
       setMessage(errMsg);
       pushNotification(
         createNotification({

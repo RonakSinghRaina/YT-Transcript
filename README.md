@@ -46,6 +46,31 @@ node preview-server.cjs
 
 Then open `http://127.0.0.1:8080/`.
 
+## Windows desktop app
+
+Installable `.exe` via Electron (UI local, API on Vercel). See **[docs/DESKTOP.md](docs/DESKTOP.md)** for full steps.
+
+```bash
+copy .env.desktop.example .env.desktop
+# Edit .env.desktop — set VITE_TRANSCRIPT_API to your Vercel URL
+npm install
+npm run dist:win
+```
+
+Dev with Electron + Vite: `npm run electron:dev`
+
+## Chrome extension
+
+Side panel on YouTube — captions fetched directly from YouTube (no Apify). See **[docs/EXTENSION.md](docs/EXTENSION.md)**.
+
+```bash
+copy .env.extension.example .env.extension
+# Set VITE_TRANSCRIPT_API and Supabase keys
+npm run build:extension
+```
+
+Load `dist-extension` as an unpacked extension in `chrome://extensions`.
+
 ## Deploying to GitHub Pages
 
 The live site is at `https://ronaksinghraina.github.io/YT-Transcript/`.

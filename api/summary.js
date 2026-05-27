@@ -1,5 +1,7 @@
 import { createServerSupabase } from '../lib/supabaseServer.mjs';
+import { resolveServerSupabaseCredentials } from '../lib/supabaseConfig.mjs';
 import { buildVideoSummary } from '../lib/summary.mjs';
+import { applyCors } from '../lib/cors.mjs';
 
 async function readBody(req) {
   if (req.body && typeof req.body === 'object') return req.body;
@@ -15,7 +17,8 @@ export async function processSummaryRequest({ accessToken, body }) {
     throw error;
   }
 
-  const supabase = createServerSupabase();
+  const { supabaseUrl, supabaseAnonKey } = resolveServerSupabaseCredentials();
+  const supabase = createServerSupabase(supabaseUrl, supabaseAnonKey);
   const { data: userData, error: userError } = await supabase.auth.getUser(accessToken);
   if (userError || !userData?.user) {
     const error = new Error('Invalid session.');
@@ -84,6 +87,8 @@ function getBearerToken(req) {
 }
 
 export default async function handler(req, res) {
+  if (applyCors(req, res)) return;
+
   if (req.method !== 'POST') {
     json(res, 405, { error: 'Method not allowed' });
     return;

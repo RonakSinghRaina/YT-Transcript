@@ -1,4 +1,5 @@
 import { generateTranscript } from '../lib/transcript.mjs';
+import { applyCors } from '../lib/cors.mjs';
 
 function json(res, status, body) {
   res.statusCode = status;
@@ -18,6 +19,8 @@ async function readBody(req) {
 }
 
 export default async function handler(req, res) {
+  if (applyCors(req, res)) return;
+
   if (req.method !== 'POST') {
     json(res, 405, { error: 'Method not allowed' });
     return;
@@ -29,6 +32,10 @@ export default async function handler(req, res) {
     const payload = await generateTranscript({
       accessToken: token,
       videoUrl: body.videoUrl,
+      clientTranscript: body.clientTranscript ?? null,
+      clientTitle: body.clientTitle ?? null,
+      clientDescription: body.clientDescription ?? null,
+      captionsOnly: body.captionsOnly === true,
       includeTimestamps: body.includeTimestamps ?? true,
       language: body.language ?? null,
       summaryLength: body.summaryLength || 'medium',

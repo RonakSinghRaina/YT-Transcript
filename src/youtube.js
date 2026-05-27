@@ -38,5 +38,8 @@ export function formatTranscriptError(message) {
   if (message === 'no-captions' || message.startsWith('no-captions')) {
     return SKIP_REASON_MESSAGES['no-captions'];
   }
+  if (message.includes('OpenAI API key is invalid') || message.includes('Whisper')) {
+    return 'Caption fetch failed. Refresh the YouTube tab and try again. (Server Whisper fallback is not used in the extension.)';
+  }
   return message;
 }

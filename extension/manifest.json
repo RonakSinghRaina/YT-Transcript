@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "TubeScribe",
+  "description": "YouTube transcripts and AI summaries in a side panel",
+  "version": "0.1.0",
+  "permissions": ["sidePanel", "storage", "tabs", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://youtube.com/*",
+    "https://*.supabase.co/*",
+    "https://*.vercel.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "extension/sidepanel.html"
+  },
+  "action": {
+    "default_title": "Open TubeScribe"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*", "https://youtube.com/*"],
+      "js": ["content/youtube-bridge.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

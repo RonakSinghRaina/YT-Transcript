@@ -1,7 +1,11 @@
 node_modules
 dist
+dist-extension
 .npm-cache
 .env
 .env.*
 !.env.example
+!.env.desktop.example
+!.env.extension.example
+release/
 .vercel

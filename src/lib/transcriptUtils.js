@@ -127,6 +127,19 @@ export function segmentsWithTimestamps(text) {
   });
 }
 
+export function formatTranscriptPlain(segments, { separator = ' ' } = {}) {
+  if (!segments?.length) return '';
+  return segments.map((s) => s.body).filter(Boolean).join(separator).trim();
+}
+
+export function formatTranscriptTimestamped(segments) {
+  if (!segments?.length) return '';
+  return segments
+    .map((s) => (s.time ? `[${s.time}] ${s.body}` : s.body))
+    .filter(Boolean)
+    .join('\n');
+}
+
 /** Use only a stored summary from the API/DB — never synthesize on the client. */
 export function resolveVideoSummary(result) {
   if (result?.summary?.overview) return result.summary;
