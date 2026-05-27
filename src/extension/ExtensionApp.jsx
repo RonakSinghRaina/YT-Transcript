@@ -180,6 +180,7 @@ export default function ExtensionApp() {
     await syncTabUrl();
 
     if (!session) {
+      setMessage('Please log in to generate transcripts.');
       setAuthMode('signup');
       setAuthOpen(true);
       return;

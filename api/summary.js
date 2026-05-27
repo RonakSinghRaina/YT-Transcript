@@ -37,24 +37,31 @@ export async function processSummaryRequest({ accessToken, body }) {
       .eq('id', body.transcriptId)
       .maybeSingle();
 
+    const fallbackTranscriptProvided = Boolean(String(body.transcript || '').trim());
     if (error || !row || row.user_id !== userData.user.id) {
-      const err = new Error('Transcript not found.');
-      err.status = 404;
-      throw err;
-    }
+      // If caller already sent transcript text, continue instead of hard-failing on missing row.
+      if (fallbackTranscriptProvided) {
+        transcript = String(body.transcript || '').trim();
+        title = body.title || title;
+      } else {
+        const err = new Error('Transcript not found.');
+        err.status = 404;
+        throw err;
+      }
+    } else {
+      if (row.summary?.overview && body.force !== true) {
+        return { summary: row.summary };
+      }
 
-    if (row.summary?.overview && body.force !== true) {
-      return { summary: row.summary };
+      transcript = row.transcript || transcript;
+      title = row.title || title;
     }
-
-    transcript = row.transcript || transcript;
-    title = row.title || title;
   }
 
   if (!transcript) {
-    const error = new Error('Transcript text is required.');
-    error.status = 400;
-    throw error;
+    const err = new Error('Transcript text is required.');
+    err.status = 400;
+    throw err;
   }
 
   const summary = await buildVideoSummary(transcript, {

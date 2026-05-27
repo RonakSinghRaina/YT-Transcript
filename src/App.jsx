@@ -252,6 +252,7 @@ export default function App() {
     setMessage('');
 
     if (!session) {
+      setMessage('Please log in to generate transcripts.');
       openAuth('signup');
       return;
     }
