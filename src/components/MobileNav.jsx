@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from './Icon';
 import BrandLogo from './BrandLogo';
+import { getDisplayName, getInitials } from '../lib/profile';
 
 const NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -18,9 +19,14 @@ export default function MobileNav({
   onGoHome,
   onNewTranscript,
   session,
+  profile,
   onLogout,
   onLogin,
+  onOpenSettings,
 }) {
+  const email = session?.user?.email || '';
+  const displayName = getDisplayName(session, profile);
+  const initials = getInitials(displayName, email);
   // Keep the component always mounted; use CSS for show/hide transitions.
   // This avoids expensive DOM mount/unmount that causes the lag.
   const [visible, setVisible] = useState(false);
@@ -43,9 +49,13 @@ export default function MobileNav({
   }, [open]);
 
   function go(id) {
-    if (id === 'dashboard') onGoHome();
-    else onNavigate(id);
     onClose();
+    // Defer the heavy page transition until after the slide-out animation finishes (280ms)
+    // This perfectly eliminates the lag / freezing behavior!
+    setTimeout(() => {
+      if (id === 'dashboard') onGoHome();
+      else onNavigate(id);
+    }, 280);
   }
 
   if (!visible) return null;
@@ -130,17 +140,35 @@ export default function MobileNav({
             New Transcript
           </button>
           {session ? (
-            <button
-              type="button"
-              onClick={() => {
-                onLogout();
-                onClose();
-              }}
-              className="flex w-full items-center gap-2 rounded-xl p-3 text-on-surface-variant transition-colors hover:bg-white/5"
-            >
-              <Icon name="logout" />
-              <span className="text-xs font-semibold uppercase">Log out</span>
-            </button>
+            <div className="flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  setTimeout(() => onOpenSettings(), 280);
+                }}
+                className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition-colors hover:bg-white/5"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/25 bg-gradient-accent-soft text-sm font-bold text-primary">
+                  {initials}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold text-on-surface">{displayName}</span>
+                  <span className="block text-xs text-on-surface-variant">View account</span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  setTimeout(() => onLogout(), 280);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl p-3 text-on-surface-variant transition-colors hover:bg-white/5"
+              >
+                <Icon name="logout" />
+                <span className="text-xs font-semibold uppercase">Log out</span>
+              </button>
+            </div>
           ) : (
             <button
               type="button"

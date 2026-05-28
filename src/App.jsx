@@ -454,8 +454,10 @@ export default function App() {
         onGoHome={goHome}
         onNewTranscript={handleNewTranscript}
         session={session}
+        profile={profile}
         onLogout={logout}
         onLogin={() => openAuth('login')}
+        onOpenSettings={() => openSettings('Account')}
       />
 
       <main className="relative z-10 flex min-w-0 flex-1 flex-col">

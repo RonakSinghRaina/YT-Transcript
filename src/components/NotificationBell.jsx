@@ -40,7 +40,7 @@ export default function NotificationBell({ notifications, onMarkAllRead, onOpenN
       <button
         type="button"
         onClick={toggleOpen}
-        className="relative rounded-full p-2 text-on-surface-variant transition-colors hover:bg-white/10 hover:text-primary"
+        className="relative flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-white/10 hover:text-primary"
         aria-label={`Notifications${unread ? `, ${unread} unread` : ''}`}
       >
         <Icon name="notifications" />
@@ -53,7 +53,7 @@ export default function NotificationBell({ notifications, onMarkAllRead, onOpenN
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-white/10 bg-surface-container-lowest shadow-2xl sm:w-96">
+        <div className="absolute right-[-10px] top-full z-50 mt-2 w-[calc(100vw-2rem)] max-w-[320px] overflow-hidden rounded-2xl border border-white/10 bg-surface-container-lowest shadow-2xl sm:right-0 sm:w-96 sm:max-w-none">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
             <h3 className="text-sm font-bold text-on-surface">Notifications</h3>
             {notifications.length > 0 && (

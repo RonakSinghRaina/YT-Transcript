@@ -26,14 +26,7 @@ export default function TopBar({
     <header className="sticky top-0 z-30 px-4 py-3 md:px-8">
       <div className="glass-panel mx-auto flex max-w-container-max items-center justify-between rounded-full border-white/10 px-4 py-2 shadow-[0_4px_24px_0_rgba(0,0,0,0.35)] md:px-8">
         <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-          <button
-            type="button"
-            onClick={onOpenMobileNav}
-            className="rounded-xl p-2 text-on-surface-variant transition-colors hover:bg-white/5 hover:text-primary md:hidden"
-            aria-label="Open menu"
-          >
-            <Icon name="menu" />
-          </button>
+
           <button
             type="button"
             onClick={onGoHome}
@@ -97,7 +90,7 @@ export default function TopBar({
             <button
               type="button"
               onClick={onOpenSettings}
-              className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-primary/25 bg-gradient-accent-soft text-sm font-bold text-primary transition-transform hover:scale-105"
+              className="hidden h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-primary/25 bg-gradient-accent-soft text-sm font-bold text-primary transition-transform hover:scale-105 md:flex"
               title={`${displayName} — Account settings`}
               aria-label="Open account settings"
             >
@@ -107,11 +100,20 @@ export default function TopBar({
             <button
               type="button"
               onClick={onOpenAuth}
-              className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold tracking-wide text-on-surface transition-all duration-300 hover:bg-white/10"
+              className="hidden rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold tracking-wide text-on-surface transition-all duration-300 hover:bg-white/10 md:block"
             >
               Log in
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={onOpenMobileNav}
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-on-surface-variant transition-colors hover:bg-white/5 hover:text-primary md:hidden"
+            aria-label="Open menu"
+          >
+            <Icon name="menu" />
+          </button>
         </div>
       </div>
     </header>
