@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import Icon from './Icon';
 import BrandLogo from './BrandLogo';
 
@@ -20,7 +21,26 @@ export default function MobileNav({
   onLogout,
   onLogin,
 }) {
-  if (!open) return null;
+  // Keep the component always mounted; use CSS for show/hide transitions.
+  // This avoids expensive DOM mount/unmount that causes the lag.
+  const [visible, setVisible] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const panelRef = useRef(null);
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true);
+      // Trigger CSS transition on next frame
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setAnimating(true));
+      });
+    } else {
+      setAnimating(false);
+      // Wait for the exit animation to finish before hiding
+      const timer = setTimeout(() => setVisible(false), 280);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
 
   function go(id) {
     if (id === 'dashboard') onGoHome();
@@ -28,21 +48,38 @@ export default function MobileNav({
     onClose();
   }
 
+  if (!visible) return null;
+
   return (
-    <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-50 md:hidden"
+      role="dialog"
+      aria-modal="true"
+      style={{ pointerEvents: animating ? 'auto' : 'none' }}
+    >
+      {/* Backdrop — simple opacity, no heavy blur */}
       <button
-        type="button"
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 transition-opacity duration-300 ease-out"
+        style={{
+          backgroundColor: `rgba(0, 0, 0, ${animating ? 0.6 : 0})`,
+        }}
         aria-label="Close menu"
         onClick={onClose}
       />
-      <aside className="absolute left-0 top-0 flex h-full w-[min(100%,280px)] flex-col border-r border-white/10 bg-surface-container-low shadow-2xl">
+
+      <aside
+        ref={panelRef}
+        className="absolute left-0 top-0 flex h-full w-[min(85vw,280px)] flex-col border-r border-white/10 bg-surface-container-low shadow-2xl transition-transform duration-300 ease-out will-change-transform"
+        style={{
+          transform: animating ? 'translateX(0)' : 'translateX(-100%)',
+        }}
+      >
         <div className="flex items-center justify-between border-b border-white/5 p-4">
           <BrandLogo size="sm" onClick={() => go('dashboard')} />
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl p-2 text-on-surface-variant hover:bg-white/5 hover:text-primary"
+            className="rounded-xl p-2 text-on-surface-variant transition-colors hover:bg-white/5 hover:text-primary"
             aria-label="Close"
           >
             <Icon name="close" />
@@ -50,18 +87,23 @@ export default function MobileNav({
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
-          {NAV.map((item) => {
+          {NAV.map((item, index) => {
             const active = page === item.id;
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => go(item.id)}
-                className={`flex items-center gap-3 rounded-xl p-3 text-left transition-colors ${
+                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-all duration-200 ${
                   active
-                    ? 'border border-primary/25 bg-gradient-accent-soft text-primary'
-                    : 'text-on-surface-variant hover:bg-white/5 hover:text-primary'
+                    ? 'border-primary/25 bg-gradient-accent-soft text-primary'
+                    : 'border-transparent text-on-surface-variant hover:bg-white/5 hover:text-primary'
                 }`}
+                style={{
+                  opacity: animating ? 1 : 0,
+                  transform: animating ? 'translateX(0)' : 'translateX(-12px)',
+                  transition: `opacity 200ms ease ${80 + index * 40}ms, transform 200ms ease ${80 + index * 40}ms`,
+                }}
               >
                 <Icon name={item.icon} fill={active} />
                 <span className="text-xs font-semibold uppercase tracking-wide">{item.label}</span>
@@ -78,6 +120,11 @@ export default function MobileNav({
               onClose();
             }}
             className="btn-pulse mb-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-accent py-3 text-xs font-semibold uppercase tracking-wide text-on-primary-container"
+            style={{
+              opacity: animating ? 1 : 0,
+              transform: animating ? 'translateY(0)' : 'translateY(8px)',
+              transition: 'opacity 200ms ease 260ms, transform 200ms ease 260ms',
+            }}
           >
             <Icon name="add" />
             New Transcript
@@ -89,7 +136,7 @@ export default function MobileNav({
                 onLogout();
                 onClose();
               }}
-              className="flex w-full items-center gap-2 rounded-xl p-3 text-on-surface-variant hover:bg-white/5"
+              className="flex w-full items-center gap-2 rounded-xl p-3 text-on-surface-variant transition-colors hover:bg-white/5"
             >
               <Icon name="logout" />
               <span className="text-xs font-semibold uppercase">Log out</span>

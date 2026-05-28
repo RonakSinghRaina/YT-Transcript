@@ -14,7 +14,14 @@ export async function requestBrowserNotificationPermission() {
   if (typeof window === 'undefined' || !('Notification' in window)) return 'unsupported';
   if (Notification.permission === 'granted') return 'granted';
   if (Notification.permission === 'denied') return 'denied';
-  return Notification.requestPermission();
+  try {
+    return await Promise.race([
+      Notification.requestPermission(),
+      new Promise((resolve) => setTimeout(() => resolve('default'), 2000))
+    ]);
+  } catch {
+    return 'default';
+  }
 }
 
 /** True when the user is not actively viewing this tab. */

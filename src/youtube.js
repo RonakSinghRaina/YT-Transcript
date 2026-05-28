@@ -24,6 +24,8 @@ const SKIP_REASON_MESSAGES = {
     'This video has no captions. Add OPENAI_API_KEY to your server .env so TubeScribe can transcribe audio with Whisper.',
 };
 
+import { isExtensionClient } from './lib/apiConfig';
+
 export function formatTranscriptError(message) {
   if (!message || message === 'Transcript generation failed.') {
     return 'Transcript generation failed. Check that you are logged in, the dev server is running, and APIFY_TOKEN is set in .env.';
@@ -38,7 +40,7 @@ export function formatTranscriptError(message) {
   if (message === 'no-captions' || message.startsWith('no-captions')) {
     return SKIP_REASON_MESSAGES['no-captions'];
   }
-  if (message.includes('OpenAI API key is invalid') || message.includes('Whisper')) {
+  if (isExtensionClient() && (message.includes('OpenAI API key is invalid') || message.includes('Whisper'))) {
     return 'Caption fetch failed. Refresh the YouTube tab and try again. (Server Whisper fallback is not used in the extension.)';
   }
   return message;

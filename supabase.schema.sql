@@ -17,8 +17,14 @@ create table if not exists public.transcript_history (
   transcript text not null,
   actor_run_id text,
   is_favorite boolean not null default false,
+  summary jsonb,
   created_at timestamptz not null default now()
 );
+
+-- Add columns if table already exists without them
+alter table public.transcript_history add column if not exists is_favorite boolean not null default false;
+alter table public.transcript_history add column if not exists summary jsonb;
+alter table public.transcript_history add column if not exists video_id text;
 
 alter table public.profiles enable row level security;
 alter table public.transcript_history enable row level security;

@@ -275,7 +275,7 @@ export default function Dashboard({
           <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-outline-variant border-t-primary" />
           <h3 className="text-lg font-semibold">Transcribing your video…</h3>
           <p className="mt-2 text-sm text-on-surface-variant">
-            This may take 20–40 seconds for longer videos.
+            This may take 30–60 seconds depending on video length.
           </p>
         </div>
       )}

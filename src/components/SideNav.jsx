@@ -28,10 +28,10 @@ export default function SideNav({ page, onNavigate, onGoHome, onNewTranscript, o
                 key={item.id}
                 type="button"
                 onClick={() => (item.id === 'dashboard' ? onGoHome() : onNavigate(item.id))}
-                className={`flex items-center gap-2 rounded-xl p-3 transition-all duration-300 ${
+                className={`flex items-center gap-2 rounded-xl border p-3 transition-all duration-300 ${
                   active
-                    ? 'scale-[0.98] border border-primary/25 bg-gradient-accent-soft text-primary shadow-[0_0_12px_rgba(124,58,237,0.12)]'
-                    : 'text-on-surface-variant hover:border hover:border-white/5 hover:bg-white/5 hover:text-primary'
+                    ? 'scale-[0.98] border-primary/25 bg-gradient-accent-soft text-primary shadow-[0_0_12px_rgba(124,58,237,0.12)]'
+                    : 'border-transparent text-on-surface-variant hover:bg-white/5 hover:text-primary'
                 }`}
               >
                 <Icon name={item.icon} fill={active} />

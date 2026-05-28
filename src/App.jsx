@@ -111,16 +111,27 @@ export default function App() {
     const local = loadLocalFavoriteIds();
     if (!local.size) return;
 
-    await Promise.all(
-      [...local].map((id) =>
-        supabase
+    const results = await Promise.allSettled(
+      [...local].map(async (id) => {
+        const { error } = await supabase
           .from('transcript_history')
           .update({ is_favorite: true })
           .eq('id', id)
-          .eq('user_id', userId),
-      ),
+          .eq('user_id', userId);
+        return { id, error };
+      }),
     );
-    clearLocalFavoriteIds();
+
+    // Only remove IDs from localStorage that were successfully synced to DB
+    let allSucceeded = true;
+    for (const result of results) {
+      if (result.status === 'rejected' || result.value?.error) {
+        allSucceeded = false;
+      }
+    }
+    if (allSucceeded) {
+      clearLocalFavoriteIds();
+    }
   }
 
   async function refreshHistory() {
@@ -225,18 +236,27 @@ export default function App() {
     if (!item?.id || !session?.user?.id) return;
     const next = !isFavorite(item);
 
-    if (isDbFavoritesSupported()) {
-      const { error } = await supabase
-        .from('transcript_history')
-        .update({ is_favorite: next })
-        .eq('id', item.id)
-        .eq('user_id', session.user.id);
+    // Always save to localStorage as immediate backup
+    setLocalFavorite(item.id, next);
 
-      if (error) {
-        setLocalFavorite(item.id, next);
+    if (isDbFavoritesSupported()) {
+      try {
+        const { data, error } = await supabase
+          .from('transcript_history')
+          .update({ is_favorite: next })
+          .eq('id', item.id)
+          .eq('user_id', session.user.id)
+          .select('id, is_favorite');
+
+        // If DB update confirmed, clear the localStorage entry (DB is source of truth)
+        if (!error && data?.length > 0) {
+          setLocalFavorite(item.id, false); // DB has it, no need for local backup
+          // But keep it in local if we're setting favorite to false
+          // (local storage only tracks favorited items)
+        }
+      } catch {
+        // localStorage backup already saved above
       }
-    } else {
-      setLocalFavorite(item.id, next);
     }
 
     setHistory((prev) =>
@@ -251,53 +271,67 @@ export default function App() {
     event?.preventDefault?.();
     setMessage('');
 
-    if (!session) {
-      setMessage('Please log in to generate transcripts.');
-      openAuth('signup');
-      return;
-    }
-
-    const videoId = getVideoId(videoUrl);
-    if (!videoId) {
-      setMessage('Paste a valid YouTube link, Shorts link, share link, embed link, or 11-character video ID.');
-      return;
-    }
-
-    const prefs = loadPrefs();
-    const apiPrefs = prefsToApiPayload(prefs);
-
-    if (prefs.notifyOnComplete && typeof Notification !== 'undefined') {
-      if (Notification.permission === 'default') {
-        await requestBrowserNotificationPermission();
-      }
-    }
-
-    if (!TRANSCRIPT_API) {
-      setMessage(PRODUCTION_API_SETUP_HINT);
-      return;
-    }
-
-    setLoading(true);
-    pushNotification(
-      createNotification({
-        type: 'info',
-        title: 'Transcription started',
-        message: 'We are extracting captions for your video. This can take a minute.',
-      }),
-    );
-
     try {
-      const response = await fetch(TRANSCRIPT_API, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          videoUrl: videoUrl.trim(),
-          ...apiPrefs,
+      if (!session) {
+        setMessage('Please log in to generate transcripts.');
+        openAuth('signup');
+        return;
+      }
+
+      const videoId = getVideoId(videoUrl);
+      if (!videoId) {
+        setMessage('Paste a valid YouTube link, Shorts link, share link, embed link, or 11-character video ID.');
+        return;
+      }
+
+      const prefs = loadPrefs();
+      const apiPrefs = prefsToApiPayload(prefs);
+
+      if (prefs.notifyOnComplete && typeof Notification !== 'undefined') {
+        if (Notification.permission === 'default') {
+          await requestBrowserNotificationPermission();
+        }
+      }
+
+      if (!TRANSCRIPT_API) {
+        setMessage(PRODUCTION_API_SETUP_HINT);
+        return;
+      }
+
+      setLoading(true);
+      pushNotification(
+        createNotification({
+          type: 'info',
+          title: 'Transcription started',
+          message: 'We are extracting captions for your video. This can take a minute.',
         }),
-      });
+      );
+
+      const fetchController = new AbortController();
+      const fetchTimeout = setTimeout(() => fetchController.abort(), 200000);
+
+      let response;
+      try {
+        response = await fetch(TRANSCRIPT_API, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            videoUrl: videoUrl.trim(),
+            ...apiPrefs,
+          }),
+          signal: fetchController.signal,
+        });
+      } catch (fetchErr) {
+        clearTimeout(fetchTimeout);
+        if (fetchErr.name === 'AbortError') {
+          throw new Error('Transcript request timed out. The video may be too long or the server is busy — please try again.');
+        }
+        throw fetchErr;
+      }
+      clearTimeout(fetchTimeout);
       let payload = {};
       try {
         payload = await response.json();
