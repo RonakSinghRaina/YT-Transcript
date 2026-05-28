@@ -21,7 +21,7 @@ function isDesktopClient() {
   );
 }
 
-function isExtensionClient() {
+export function isExtensionClient() {
   return import.meta.env.VITE_IS_EXTENSION === 'true';
 }
 
